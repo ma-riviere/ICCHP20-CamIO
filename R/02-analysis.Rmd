@@ -1,0 +1,496 @@
+## Scores as a function of time / trial :
+***
+
+### Linear fit on time/trials:
+
+```{r}
+data.long.time.G <- data.long %>% 
+  group_by(subject, mode) %>% 
+  mutate(id = seq_along(hotspot)) %>% 
+  ungroup() %>%
+  select(id, everything()) %>%
+  filter(mode == "G")
+```
+
+```{r}
+lin.mod.time <- lm(time ~ id, data.long.time.G)
+```
+
+```{r}
+broom::tidy(lin.mod.time) %>%
+  DT::datatable(
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: LM time model summary')
+  )
+) %>% formatRound(2:5, 4)
+```
+
+
+```{r}
+fig <- data.long.time.G %>% 
+  ggplot(aes(x = id, y = time, color = subject)) +
+  labs(title= glue('Fig {tc<-tc+1}: Score evolution per trial (guided mode)'), x = "Trials") +
+  theme(legend.position = "none") +
+  facet_wrap(. ~ subject, ncol = 2) +
+  geom_point() +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    #family = gaussian(link = 'log'),
+    alpha = .15,
+    aes(fill = subject)
+  )
+
+ggplotly(fig)
+```
+
+#### (TODO) Fit metrics:
+
+[!] TODO: fit per subject
+
+```{r}
+broom::glance(lin.mod.time) %>% 
+  DT::datatable(
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: Linear model evaluation summary')
+  )
+) %>% formatRound(1:10, 4)
+```
+
+
+Overall, there's a very bad linear fit on trials/time with current data. We'd need more values see an eventual temporal trend in the data, with the high amount of variations in scores per hotspot & per subject.
+
+### (TODO) Linear fit with autocorrelation:
+
+[!] TODO: see [here](https://www.r-bloggers.com/linear-regression-with-correlated-data/)
+
+```{r}
+#lin.mod.time.ar <- nlme::gls(time ~ mode, correlation=nlme::corAR1(form=~1), data = data.long.time.G)
+#anova(lin.mod.time, lin.mod.time.ar)
+```
+
+### Exponential fit on time/trials:
+
+No convergence with current data
+
+```{r}
+# Estimating the initial parameters (using a linear model)
+# TODO: check nlstools
+
+##exp.forumla <- alpha * exp(beta * x) + theta
+
+# theta.0 <- min(dt_time$time) * 0.5
+# 
+# model.0 <- lm(log(time - theta.0) ~ id, data=dt_time)  
+# alpha.0 <- exp(coef(model.0)[[1]])
+# beta.0 <- coef(model.0)[[2]]
+# 
+# start <- c(alpha = alpha.0, beta = beta.0, theta = theta.0)
+# print(start)
+```
+
+```{r}
+# fig <- ggplot(data_P1, aes(x = id)) +
+#   labs(title= glue('Fig {tc<-tc+1}: Test'), x = "Trials") +
+#   geom_point(aes(y = time)) +
+#   stat_function(fun = function(x) start[1] * exp(start[2] * x) + start[3], n = 100, color="red")
+# 
+# ggplotly(fig)
+```
+
+```{r}
+# exp.model <- nlme::gnls(time ~ alpha * exp(beta * id) + theta, data=data_P1, start=start)
+# exp.model
+```
+
+### Sigmoid fit on time/trials:
+
+No convergence with current data
+```{r}
+# sig.mod <- gnls(time ~ SSlogis(id, asym, xmid, scal), data=data_P1, start=list(a=1,b=.5,c=25))
+# summary(sig.mod)
+```
+
+```{r}
+# fig <- ggplot(data_P1, aes(x = id)) +
+#   labs(title= glue('Fig {tc<-tc+1}: Sigmoid fit'), x = "Trials") +
+#   geom_point(aes(y = time)) +
+#   stat_function(fun = function(x) params[1] / (1 + exp(-params[2] * (x - params[3]))), n = 100, color="blue")
+# 
+# ggplotly(fig)
+```
+
+Both sigmoid & exponential fit don't converge with the current data.
+
+## Pairwise differences evaluation:
+***
+
+### Pairwise differences summary :
+
+Paired by hotspot
+
+```{r}
+pairwise <- data.long %>%
+  group_by(subject, hotspot) %>%
+  summarize(diff = abs(diff(time))) %>%
+  ungroup()
+```
+
+```{r}
+DT::datatable(
+  pairwise,
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(style = 'caption-side: bottom; text-align: center;',
+                                    glue('Fig {tc<-tc+1}: Summary statistics of pairwise differences'))
+)
+```
+
+### Pairwise differences distribution :
+
+```{r}
+pairwise.fig <- pairwise %>%
+  ggplot(aes(x=diff)) +
+  geom_histogram(aes(y=..density..), binwidth=5, alpha=0.9, color="blue", fill="blue", boundary = 1) +
+  geom_density(alpha=0.6, adjust=1.2, color="blue", fill="blue") + 
+  labs(title= glue('Fig {tc<-tc+1}: Distribution of pairwise score differences'), x = "Pairwise difference in time to find the hotspot")
+
+ggplotly(pairwise.fig)
+```
+
+#### Violin + Box-plot:
+
+```{r}
+plot_ly(
+    pairwise,
+    y = ~diff,
+    type = 'violin',
+    points = 'all',
+    box = list(visible = T),
+    meanline = list(visible = T),
+    colors = "Set1"
+  ) %>%
+  layout(
+    yaxis = list(title = "Pairwise time difference", range=c(0,120)),
+    title = glue('Fig {tc<-tc+1}: Violin + Box-Plots of pairwise differences')
+  )
+```
+
+### Pairwise differences normality:
+
+#### QQ Plot:
+
+```{r}
+ggplotly(
+  ggplot(pairwise, aes(sample = diff)) + 
+    geom_qq(color="blue") + 
+    geom_qq_line() +
+    labs(title= glue('Fig {tc<-tc+1}: QQ plot of score diffrences'))
+  )
+```
+
+#### Summary:
+
+```{r}
+moments <- pairwise %>%
+  summarize(
+    n = n(),
+    median = median(diff),
+    mean = mean(diff),
+    skew = skewness(diff),
+    kurt = kurtosis(diff),
+    SW.p = shapiro.test(diff)$p.value
+  )
+  
+DT::datatable(
+  moments,
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: Summary statistics of score differences')
+  )
+) %>%
+  formatRound(4:ncol(moments), 4) %>%
+  formatStyle('SW.p',
+              color = styleInterval(alpha, c('red', 'gray')),
+              fontWeight = styleInterval(alpha, c('bold', 'normal')))
+```
+
+
+### Box-Cox transformation:
+
+Box-Cox transform with $\lambda = 6$
+
+```{r}
+pairwise.boxcox <- pairwise %>%
+  mutate(bc.diff = BoxCox(diff, 6))
+```
+
+```{r}
+pairwise.boxcox.fig <- pairwise.boxcox %>%
+  ggplot(aes(x=bc.diff)) +
+  geom_density(alpha=0.8, color="blue", fill="blue", adjust=1.2) +
+  labs(title= glue('Fig {tc<-tc+1}: Pairwise score difference distribution (Box-Cox)'), x = "BoxCox(Time to find hotspot)")
+
+ggplotly(pairwise.boxcox.fig)
+```
+
+```{r}
+ggplotly(
+  ggplot(pairwise.boxcox, aes(sample = bc.diff)) + 
+    geom_qq(color="blue") + 
+    geom_qq_line() +
+    labs(title= glue('Fig {tc<-tc+1}: QQ plot of Box-Cox corrected score diffrences'))
+  )
+```
+
+```{r}
+summary.pairwise.boxcox <- pairwise.boxcox %>%
+  summarize(
+    n = n(),
+    skew = skewness(diff),
+    kurt = kurtosis(diff),
+    SW.p = shapiro.test(diff)$p.value,
+    skew.boxcox = skewness(bc.diff),
+    kurt.boxcox = kurtosis(bc.diff),
+    SW.p.boxcox = shapiro.test(bc.diff)$p.value
+  )
+
+DT::datatable(
+  summary.pairwise.boxcox,
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: Summary statistics of Box-Cox transformed score differences')
+  )
+) %>%
+  formatRound(2:ncol(summary.pairwise.boxcox), 4) %>%
+  formatStyle(c('SW.p', 'SW.p.boxcox'),
+              color = styleInterval(alpha, c('red', 'gray')),
+              fontWeight = styleInterval(alpha, c('bold', 'normal')))
+```
+
+The Box-Cox transform seems to make the date more normal --> to investigate ?
+
+## Non-parametric comparaisons:
+***
+
+### Wilcoxon Signed-Rank Test:
+
+```{r}
+data.wide.GN <- data.long %>% reshape2::dcast(subject+hotspot~mode,  value.var="time")
+#print(data.wide.GN)
+```
+
+```{r}
+wilcoxon.res <- wilcox.test(data.wide.GN$N, data.wide.GN$G, alternative="two.sided", paired=TRUE, conf.int=TRUE)
+
+summary.wilcoxon <- wilcoxon.res %>% tidy
+
+DT::datatable(
+  summary.wilcoxon,
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: Signed-Rank Wilcoxon Test summary')
+  )
+) %>% formatRound(1:5, 10)
+```
+
+#### Effect size:
+
+```{r}
+wilcoxon.es <- wilcoxon.res$statistic / sqrt(nrow(data.wide.GN))
+#wilcoxon.es2 <- data.long %>% rstatix::wilcox_effsize(time ~ mode, paired=TRUE)
+print(wilcoxon.es)
+```
+
+Effect-size for Wilcoxon Signed-Rank Test is `r wilcoxon.es`
+
+### (TODO) Resampling test:
+
+[!] TODO
+
+## Parametric models :
+***
+
+### LM model:
+
+I'm only fitting a linear model for experimenting: with the current data, almost every assumption of Linear Models is violated.
+
+```{r results=F}
+lin.mod <- lm(time ~ mode, data.long)
+```
+
+#### Heteroscedasticity:
+
+```{r}
+par(mfrow=c(2,2))
+plot(lin.mod, 1:2)
+```
+
+* Residual vs Fitted: The difference in spread in both conditions points towards heteroscedasticity, so that linear model doesn't hold.
+* QQ plot: data is also obviously not normal.
+
+##### Heteroscedasticity test :
+
+```{r}
+lmtest::bptest(lin.mod) %>% tidy
+```
+
+No surprise on the heteroscedasticity with the right-censoring of the measures.
+
+[!] TODO: try to fix it ?  
+- Data transform (Box-Cox, ...) ?   
+- GLS Regression ?  
+- Truncated regression ?
+
+#### Predicted values: 
+
+```{r}
+ggpredict(lin.mod, terms = c("mode")) %>% plot(add.data = TRUE)
+```
+
+#### Model fit:
+
+```{r}
+broom::glance(lin.mod)
+```
+Significant effect of the guidance mode (but we can't really use that test/model)
+
+AIC of ~747
+
+#### Effects / contrasts :
+
+```{r}
+#broom::tidy(car::Anova(lin.mod))
+```
+
+```{r}
+broom::tidy(lin.mod) %>%
+  DT::datatable(
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: LM model summary')
+  )
+) %>% formatRound(2:5, 4)
+```
+
+```{r}
+emm1 = emmeans(lin.mod, specs = pairwise ~ mode, adjust = "none", type = "response")
+
+emm1$contrasts %>% 
+  summary(infer = TRUE) %>% 
+  as.data.frame %>%
+  DT::datatable(
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: LM contrast summary')
+  )
+) %>% formatRound(c(3,5,6,7,8), 4)
+```
+
+[!] TODO: bootstrap CI measures ?
+
+```{r}
+plot(emm1) + 
+  theme_bw() + 
+  labs(x = "Estimated time (mean, 95CI)", y = "Condition")
+```
+
+
+
+
+
+### (TODO) GLM model:
+
+[!] TODO: find the optimal familly and link function for the data.
+
+```{r}
+glin.mod <- glm(time ~ mode, data.long, family=Gamma(link="log"))
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(glin.mod, 1:2)
+```
+
+#### Model fit:
+
+```{r}
+broom::glance(glin.mod) %>% 
+  DT::datatable(
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: GLM evaluation summary')
+  )
+) %>% formatRound(1:10, 4)
+```
+
+
+
+
+
+### (TODO) GLMM model:
+
+[!] TODO
+
+```{r}
+data.long.time2 <- data.long %>% 
+  group_by(subject, mode) %>% 
+  mutate(id = seq_along(hotspot)) %>% 
+  ungroup() %>%
+  select(id, everything()) %T>% print
+```
+
+```{r}
+glmm1 <- lmer(time ~mode + (1|id/mode), data=data.long.time2)
+glmm1
+```
+
+Checking model assumptions (normality of residuals = homeoscedasticity along predicted values)
+```{r}
+par(mfrow=c(2,2))
+plot(glmm1)
+```
+
+### Model comparison:
+
+```{r}
+t1 <- tbl_regression(lin.mod)
+t2 <- tbl_regression(glin.mod, exponentiate = TRUE)
+
+tbl_merge(
+    tbls = list(t1, t2),
+    tab_spanner = c("**Linear**", "**Generalized (Gaussian, Log link)**")
+  ) %>%
+  bold_labels()
+```
+
+
+
+[!] TODO: model fit comparison
+
+```{r}
+# adj_R2 <-rbind("exp.model" = summary(exp.model)$adj.r.squared,
+#                "sig.model" = summary(sig.model)$adj.r.squared,
+#                "lin.model" = summary(lin.model)$adj.r.squared)
+# 
+# colnames(adj_R2) <- "adj_R2"
+# adj_R2
+```

@@ -1,0 +1,348 @@
+## Data:
+***
+
+Original data:
+
+```{r}
+DT::datatable(
+  data.wide,
+  class = 'cell-border stripe compact',
+  filter = 'top',
+  options = list(pageLength = 20, autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: Filtered data (wide format)'))
+)
+```
+
+Long format: 
+
+```{r}
+DT::datatable(
+  data.long,
+  class = 'cell-border stripe compact',
+  filter = 'top',
+  options = list(pageLength = 20, autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: Data (long format)'))
+)
+```
+
+## Global summary statistics:
+***
+
+```{r}
+desc <- data.long %>%
+  group_by(mode) %>%
+  summarize(
+    n = n(),
+    mean = mean(time),
+    median = median(time),
+    sd = sd(time),
+    skew = skewness(time),
+    kurt = kurtosis(time),
+    SW.p = shapiro.test(time)$p.value
+  )
+
+DT::datatable(
+  desc,
+  class = 'cell-border stripe compact',
+  filter = 'top',
+  options = list(pageLength = 20, autoWidth = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    glue('Fig {tc<-tc+1}: Summary statistics'))
+) %>% 
+  formatRound(2:ncol(desc), 5) %>%
+  formatStyle(
+    'SW.p',
+    color = styleInterval(alpha, c('red', 'gray')),
+    fontWeight = styleInterval(alpha, c('bold', 'normal')),
+  )
+```
+
+[!] TODO: better summary table
+|   See [here](https://dabblingwithdata.wordpress.com/2018/01/02/my-favourite-r-package-for-summarising-data/)
+
+```{r}
+#data.long %>% tbl_summary %>% bold_labels
+#summary(arsenal::tableby(mode ~ hotspot, data.long), title = "Arsenal summary")
+table1::table1(~time | mode + subject, data = data.long)
+```
+
+## Summary statistics per guidance mode:
+***
+
+### Distribution of scores per guidance mode :
+
+```{r}
+fig <- data.long %>% 
+  group_by(mode) %>% 
+  mutate(med = median(time)) %>% 
+  ungroup() %>%
+  ggplot(aes(x=time, fill=mode, color=mode)) +
+  geom_histogram(aes(y=..density..), binwidth=15, alpha=0.8, fill="white", boundary = 1) +
+  geom_density(alpha=0.6, adjust=6) + 
+  theme(legend.position = "none") +
+  labs(title= glue('Fig {tc<-tc+1}: Score distributions + median values per type of guidance'), x = "Time to find hotspot") +
+  facet_wrap(. ~ mode) +
+  geom_vline(aes(xintercept=med, group=mode, color=mode, label="100"), linetype="dashed", size=1) +
+  geom_text(aes(x=med - 10, label=med, y=0.055))
+
+ggplotly(fig)
+```
+
+### Violin & Box plots per guidance mode:
+
+```{r}
+plot_ly(
+    data.long,
+    x = ~mode,
+    y = ~time,
+    color = ~mode,
+    type = 'violin',
+    points = 'all',
+    box = list(visible = T),
+    meanline = list(visible = T),
+    showlegend = FALSE,
+    colors = "Set1"
+  ) %>%
+  plotly::layout(
+    xaxis = list(title = "Subjects"),
+    yaxis = list(title = "Time", range = c(0,120)),
+    title = glue('Fig {tc<-tc+1}: Violin + Box-Plots per guidance mode')
+  )
+```
+
+### Summary of scores per guidance mode :
+
+```{r}
+summary.mode <- data.long %>%
+  group_by(mode) %>%
+  summarize(
+    n = n(),
+    median = median(time),
+    mean = mean(time),
+    skew = skewness(time),
+    kurt = kurtosis(time),
+    SW.p = shapiro.test(time)$p.value
+  )
+  
+DT::datatable(
+  summary.mode,
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(style = 'caption-side: bottom; text-align: center;',
+                                    glue('Fig {tc<-tc+1}: Summary statistics per guidance mode'))
+) %>%
+  formatRound(5:ncol(summary.mode), 4) %>%
+  formatStyle('SW.p',
+              color = styleInterval(alpha, c('red', 'gray')),
+              fontWeight = styleInterval(alpha, c('bold', 'normal')))
+```
+
+## Summary statistics per subject:
+***
+
+### Distribution per subject (guided condition):
+
+```{r}
+fig <- data.long %>% 
+  filter(mode == "G") %>%
+  group_by(subject) %>% 
+  mutate(med = median(time)) %>% 
+  ungroup() %>%
+  ggplot(aes(x=time, fill=subject, color=subject)) +
+  geom_histogram(aes(y=..density..), binwidth=5, alpha=0.8, fill="white", boundary = 1, position="identity") +
+  geom_density(aes(fill=subject), alpha=0.6, adjust=2) + 
+  theme(legend.position = "none") +
+  facet_wrap(. ~ subject, ncol=2) +
+  geom_vline(aes(xintercept=med, color=subject), linetype="dashed", size=1) +
+  geom_text(aes(x=med - 5, label=med, y=-0.01)) +
+  labs(title= glue('Fig {tc<-tc+1}: Score distributions & median scores per subject (guided mode)'), x = "Time to find hotspot")
+
+ggplotly(fig)
+```
+
+### Violin & Box plots per subject (guided condition):
+
+```{r}
+plot_ly(
+    data.long %>% filter(mode == "G"),
+    x = ~subject,
+    y = ~time,
+    color = ~subject,
+    type = 'violin',
+    points = 'all',
+    box = list(visible = T),
+    meanline = list(visible = T),
+    showlegend = FALSE,
+    colors = "Set1"
+  ) %>%
+  plotly::layout(
+    xaxis = list(title = "Subjects"),
+    yaxis = list(title = "Time", range = c(0,120)),
+    title = glue('Fig {tc<-tc+1}: Violin + Box-Plots (guided condition)')
+  )
+```
+
+### Summary per subject (guided condition):
+
+```{r}
+summary.subject <- data.long %>%
+  filter(mode == "G") %>%
+  group_by(subject) %>%
+  summarize(
+    n = n(),
+    median = median(time),
+    mean = mean(time),
+    skew = skewness(time),
+    kurt = kurtosis(time),
+    SW.p = shapiro.test(time)$p.value
+  )
+ 
+DT::datatable(
+  summary.subject,
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(style = 'caption-side: bottom; text-align: center;',
+                                    glue('Fig {tc<-tc+1}: Summary statistics per subject'))
+) %>%
+  formatRound(5:ncol(summary.subject), 4) %>%
+  formatStyle('SW.p',
+              color = styleInterval(alpha, c('red', 'gray')),
+              fontWeight = styleInterval(alpha, c('bold', 'normal')))
+```
+
+
+```{r}
+## Violin + Box plots per subject * mode
+
+# violin <- data.long %>%
+#   plot_ly(
+#     type = 'violin',
+#     points = 'all',
+#     #color = ~subject,
+#     box = list(visible = T),
+#     meanline = list(visible = T),
+#     showlegend = FALSE,
+#     colors = "Set1"
+#   )
+# 
+# violin %<>%
+#   add_trace(
+#     x = ~subject[data.long$mode == 'G'],
+#     y = ~time[data.long$mode == 'G'],
+#     legendgroup = 'G',
+#     scalegroup = 'G',
+#     name = 'G',
+#     color = I("blue")
+#     # box = list(
+#     #   visible = T
+#     # ),
+#     # meanline = list(
+#     #   visible = T
+#     # )
+#   )
+# 
+# violin %<>%
+#   add_trace(
+#     x = ~subject[data.long$mode == 'N'],
+#     y = ~time[data.long$mode == 'N'],
+#     legendgroup = 'N',
+#     scalegroup = 'N',
+#     name = 'N',
+#     color = I("pink")
+#     # box = list(
+#     #   visible = T
+#     # ),
+#     # meanline = list(
+#     #   visible = T
+#     # ),
+#   ) 
+# 
+# violin %<>%
+#   layout(
+#     xaxis = list(title = "Subject and Guidance mode"),
+#     yaxis = list(title = "Time", range = c(0,130)),
+#     title = glue('Figure {tc<-tc+1}: Violin + Box-Plots for both conditions'),
+#     violinmode = 'group'
+#   )
+# 
+# violin
+```
+
+## Summary statistics per hotspot:
+***
+
+### Distribution per hotspot (guided condition):
+
+```{r fig.width=10, fig.height=10}
+fig <- data.long %>%
+  filter(mode == "G") %>%
+  group_by(hotspot) %>% 
+  mutate(med = median(time)) %>% 
+  ungroup() %>%
+  ggplot(aes(x=time, fill=hotspot, color=hotspot)) +
+  geom_histogram(aes(y=..density..), binwidth=5, alpha=0.8, fill="white", boundary = 1, position="identity") +
+  geom_density(aes(fill=hotspot), alpha=0.6, adjust=3) + 
+  theme(legend.position = "none") +
+  facet_wrap(. ~ hotspot, ncol=4) +
+  geom_vline(aes(xintercept=med, color=hotspot), linetype="dashed", size=1) +
+  geom_text(aes(x=med + 10, label=med, y=-0.02)) +
+  labs(title = glue('Fig {tc<-tc+1}: Score distributions & median scores per hotspot (guided mode)'),
+    x = "Time to find hotspot")
+
+ggplotly(fig)
+```
+
+### Violin & Box plots per hotspot (guided mode):
+
+```{r}
+plot_ly(
+    data.long %>% filter(mode == "G"),
+    x = ~hotspot,
+    y = ~time,
+    color = ~hotspot,
+    type = 'violin',
+    points = 'all',
+    box = list(visible = T),
+    meanline = list(visible = T),
+    showlegend = FALSE,
+    colors = "Set1"
+  ) %>%
+  layout(
+    xaxis = list(title = "Hotspots"),
+    yaxis = list(title = "Time", range = c(0,120)),
+    title = glue('Fig {tc<-tc+1}: Violin + Box-Plots per hotspot (guided mode)')
+  )
+```
+
+### Summary per hotspot (guided mode):
+
+```{r}
+summary.hotspots <- data.long %>%
+  filter(mode == "G") %>%
+  group_by(hotspot) %>%
+  summarize(
+    n = n(),
+    median = median(time),
+    mean = mean(time),
+    skew = skewness(time),
+    kurt = kurtosis(time),
+    SW.p = shapiro.test(time)$p.value
+  )
+ 
+DT::datatable(
+  summary.hotspots,
+  class = 'cell-border stripe compact',
+  options = list(autoWidth = TRUE),
+  caption = htmltools::tags$caption(style = 'caption-side: bottom; text-align: center;',
+                                    glue('Fig {tc<-tc+1}: Summary statistics per hotspot (guided mode)'))
+) %>%
+  formatRound(5:ncol(summary.hotspots), 4) %>%
+  formatStyle('SW.p',
+              color = styleInterval(alpha, c('red', 'gray')),
+              fontWeight = styleInterval(alpha, c('bold', 'normal')))
+```

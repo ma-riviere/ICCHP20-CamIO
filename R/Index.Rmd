@@ -1,0 +1,104 @@
+---
+title: "CamIO data analysis"
+author: "RIVIERE Marc-Aurèle"
+output:
+  prettydoc::html_pretty:
+    highlight: github
+    math: mathjax
+    code_folding: hide
+    number_sections: yes
+    theme: cayman
+    toc: yes
+  html_notebook:
+    code_folding: hide
+    highlight: tango
+    number_sections: yes
+    theme: spacelab
+    toc: yes
+  pdf_document:
+    number_sections: yes
+    toc: yes
+  html_document:
+    theme: sandstone
+    highlight: tango
+    df_print: paged
+    toc: yes
+always_allow_html: yes
+---
+
+# Setup:
+
+```{r setup, include=FALSE, cache=FALSE}
+
+if (!require(pacman)) install.packages("pacman")
+
+pkg_list <- c("glue", "broom", "magrittr", "prettydoc", "DT", "reshape2", "plotly", "moments", "emmeans", "gtsummary", "lmtest", "table1", "rstatix", "lme4", "ggeffects", "tidyverse", "conflicted", "forecast")
+
+pacman::p_load(char = pkg_list) #update=TRUE
+pacman::p_load_gh("rstudio/gt")
+#knitr::write_bib(c(.packages(), pkg_list), 'bib/packages.bib')
+
+knitr::opts_chunk$set(
+  fig.align="center",
+  #fig.pos = "!H",
+  #out.extra = "",
+  tidy = TRUE,
+  warning = FALSE,
+  echo = FALSE,
+  message = FALSE,
+  error=FALSE,
+  cache = FALSE
+)
+
+options(scipen=999, digits=5)
+
+tc <- 0
+alpha <- 0.05
+set.seed(42)
+```
+
+```{r}
+sessionInfo()
+
+conflict_prefer("select", "dplyr")
+conflict_prefer("filter", "dplyr")
+conflict_prefer("layout", "plotly")
+
+# includes:
+#   in_header: header.html
+#   after_body: sig.html
+```
+
+# Data preparation:
+***
+***
+
+```{r}
+data.wide <- readr::read_csv("../data/camio.csv") %>% dplyr::select(-X1) %T>% print
+```
+
+```{r results=FALSE}
+## With reshape2
+data.long <- data.wide %>% reshape2::melt(measure.vars=c("P1", "P2", "P3", "P4"), variable.name = "subject", value.name="time") %T>% print
+
+## (old) With tidyr 0.8.5
+#data.long <- data.wide %>% gather(key="subject", value="time", "P1":"P4") %T>% print
+#data.long <- data.wide %>% gather(key="subject", value="time", c("P1", "P2", "P3", "P4")) %T>% print
+
+## With tidyr 1.0.0
+#data.long <- data.wide %>% pivot_longer(cols = "P1":"P4", names_to="subject", values_to = "time") %T>% print
+```
+
+# Summary / descriptive statistics:
+***
+***
+
+```{r child = '01-visualizations.Rmd', echo=TRUE}
+```
+
+# Analysis:
+***
+***
+
+```{r child = '02-analysis.Rmd', echo=TRUE}
+```

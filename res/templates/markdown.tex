@@ -1,0 +1,89 @@
+% This is template.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+
+\documentclass[runningheads]{$templates$llncs}
+
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\usepackage{etoolbox}
+
+$preamble$
+
+$if(highlighting-macros)$
+$highlighting-macros$
+$endif$
+
+% Include packages from YAML header
+$if(csl-refs)$
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newenvironment{cslreferences}%
+  {$if(csl-hanging-indent)$\setlength{\parindent}{0pt}%
+  \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces$endif$}%
+  {\par}
+$endif$
+
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+
+\begin{document}
+
+\title{$title$}
+$if(subtitle)$\subtitle{$subtitle$}$endif$
+$if(titlerunning)$\titlerunning{$titlerunning$}$endif$
+%
+\newbool{flag}
+\boolfalse{flag}
+%
+\author{
+$for(authors)$
+\ifbool{flag}{\and}{\booltrue{flag}}$authors.name$\inst{$authors.inst$}\orcidID{$authors.orcid$}
+$endfor$}
+%
+$if(authorrunning)$
+\authorrunning{$authorrunning$}
+$endif$
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\boolfalse{flag}
+%
+\institute{
+$for(institutes)$
+\ifbool{flag}{\and}{\booltrue{flag}}
+$if(institutes.name)$ $institutes.name$ $endif$\\
+$if(institutes.emails)$ \email{$institutes.emails$} $endif$
+$endfor$}
+
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+$abstract$
+\\
+\boolfalse{flag}
+\keywords{
+$for(keywords)$ 
+\ifbool{flag}{\and}{\booltrue{flag}}
+$keywords$
+$endfor$}
+\end{abstract}
+%
+%
+$body$
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+\bibliographystyle{$templates$splncs04}
+% \bibliography{bibliography}
+\bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
+
+\end{document}

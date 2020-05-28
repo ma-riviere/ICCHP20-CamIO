@@ -1,0 +1,25 @@
+
+```{r}
+conditions <- c('1n', '10g', '2n', '4g', '6n', '7g', '8n', '8g', '9n', '3g', '10n', '5g', '7n', '2g', '5n', '6g', '4n', '9g', '3n', '1g')
+#Amy, Khoja, Sarah, Brandon
+P1 <- c(120,  20,    120,   53,  120,   41,   120,  11,   120,  13,   120,   14,   120, 14,   120,   16,  120,   56,   120,  31)
+P2 <- c(120,  13,    120,   20,  120,   40,   120,  14,   120,  1,   120,    16,   120, 12,   120,   18,  120,   35,   98,   7)
+P3 <- c(120,  2,     73,    24,  120,   20,   120,  24,    13,  8,    71,     9,   120, 29,   120,   16,  120,   9,    59,   10)
+P4 <- c(82,   14,    120,   15,  70,    28,   120,   9,     4,  1,    120,    9,    14, 15,    47,   15,  120,   9,    118,  6)
+
+data <- data.frame(conditions, P1, P2, P3, P4)
+```
+
+```{r}
+# Splitting your "condition" variable into two separate factors: hotspot & mode (G vs NG)
+data_wide <- data %>% 
+  mutate(hotspot = as.factor(str_extract(conditions, "[0-9]+"))) %>% 
+  mutate(mode = as.factor(toupper(str_extract(conditions, "[aA-zZ]+")))) %>% 
+  #mutate(index = as.factor(seq.int(nrow(.)))) %>%
+  select(hotspot, mode, everything(), -conditions)
+```
+
+```{r}
+# Save filtered data as .csv file
+write.csv(data_wide, 'data/camio.csv', row.names = TRUE)
+```
