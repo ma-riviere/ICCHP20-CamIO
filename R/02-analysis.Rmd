@@ -9,7 +9,7 @@ data.long.time.G <- data.long %>%
   mutate(id = seq_along(hotspot)) %>% 
   ungroup() %>%
   select(id, everything()) %>%
-  filter(mode == "G")
+  filter(mode == "G") %T>% print
 ```
 
 ```{r}
@@ -49,7 +49,7 @@ ggplotly(fig)
 
 #### (TODO) Fit metrics:
 
-[!] TODO: fit per subject
+[!] TODO: fit per subject --> random effect on subject ?
 
 ```{r}
 broom::glance(lin.mod.time) %>% 
@@ -139,14 +139,13 @@ Paired by hotspot
 pairwise <- data.long %>%
   group_by(subject, hotspot) %>%
   summarize(diff = abs(diff(time))) %>%
-  ungroup()
+  ungroup() %T>% print
 ```
 
 ```{r}
 DT::datatable(
   pairwise,
   class = 'cell-border stripe compact',
-  options = list(autoWidth = TRUE),
   caption = htmltools::tags$caption(style = 'caption-side: bottom; text-align: center;',
                                     glue('Fig {tc<-tc+1}: Summary statistics of pairwise differences'))
 )
@@ -286,7 +285,7 @@ The Box-Cox transform seems to make the date more normal --> to investigate ?
 ### Wilcoxon Signed-Rank Test:
 
 ```{r}
-data.wide.GN <- data.long %>% reshape2::dcast(subject+hotspot~mode,  value.var="time")
+data.wide.GN <- data.long %>% reshape2::dcast(subject+hotspot~mode,  value.var="time") %T>% print
 #print(data.wide.GN)
 ```
 
@@ -303,7 +302,7 @@ DT::datatable(
     style = 'caption-side: bottom; text-align: center;',
     glue('Fig {tc<-tc+1}: Signed-Rank Wilcoxon Test summary')
   )
-) %>% formatRound(1:5, 10)
+) %>% formatRound(1:5, 2)
 ```
 
 #### Effect size:

@@ -32,13 +32,13 @@ DT::datatable(
 ## Global summary statistics:
 ***
 
-```{r}
+```{r warnings=F}
 desc <- data.long %>%
   group_by(mode) %>%
   summarize(
     n = n(),
-    mean = mean(time),
     median = median(time),
+    mean = mean(time),
     sd = sd(time),
     skew = skewness(time),
     kurt = kurtosis(time),
@@ -48,13 +48,11 @@ desc <- data.long %>%
 DT::datatable(
   desc,
   class = 'cell-border stripe compact',
-  filter = 'top',
-  options = list(pageLength = 20, autoWidth = TRUE),
   caption = htmltools::tags$caption(
     style = 'caption-side: bottom; text-align: center;',
     glue('Fig {tc<-tc+1}: Summary statistics'))
 ) %>% 
-  formatRound(2:ncol(desc), 5) %>%
+  formatRound(5:ncol(desc), 4) %>%
   formatStyle(
     'SW.p',
     color = styleInterval(alpha, c('red', 'gray')),
@@ -87,7 +85,7 @@ fig <- data.long %>%
   theme(legend.position = "none") +
   labs(title= glue('Fig {tc<-tc+1}: Score distributions + median values per type of guidance'), x = "Time to find hotspot") +
   facet_wrap(. ~ mode) +
-  geom_vline(aes(xintercept=med, group=mode, color=mode, label="100"), linetype="dashed", size=1) +
+  geom_vline(aes(xintercept=med, group=mode, color=mode), linetype="dashed", size=1) +
   geom_text(aes(x=med - 10, label=med, y=0.055))
 
 ggplotly(fig)
@@ -132,7 +130,6 @@ summary.mode <- data.long %>%
 DT::datatable(
   summary.mode,
   class = 'cell-border stripe compact',
-  options = list(autoWidth = TRUE),
   caption = htmltools::tags$caption(style = 'caption-side: bottom; text-align: center;',
                                     glue('Fig {tc<-tc+1}: Summary statistics per guidance mode'))
 ) %>%
@@ -205,7 +202,6 @@ summary.subject <- data.long %>%
 DT::datatable(
   summary.subject,
   class = 'cell-border stripe compact',
-  options = list(autoWidth = TRUE),
   caption = htmltools::tags$caption(style = 'caption-side: bottom; text-align: center;',
                                     glue('Fig {tc<-tc+1}: Summary statistics per subject'))
 ) %>%
@@ -337,12 +333,11 @@ summary.hotspots <- data.long %>%
 DT::datatable(
   summary.hotspots,
   class = 'cell-border stripe compact',
-  options = list(autoWidth = TRUE),
   caption = htmltools::tags$caption(style = 'caption-side: bottom; text-align: center;',
                                     glue('Fig {tc<-tc+1}: Summary statistics per hotspot (guided mode)'))
 ) %>%
   formatRound(5:ncol(summary.hotspots), 4) %>%
   formatStyle('SW.p',
-              color = styleInterval(alpha, c('red', 'gray')),
+              color = styleInterval(alpha, c('red', 'black')),
               fontWeight = styleInterval(alpha, c('bold', 'normal')))
 ```

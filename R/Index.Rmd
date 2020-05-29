@@ -32,17 +32,17 @@ always_allow_html: yes
 
 if (!require(pacman)) install.packages("pacman")
 
-pkg_list <- c("glue", "broom", "magrittr", "prettydoc", "DT", "reshape2", "plotly", "moments", "emmeans", "gtsummary", "lmtest", "table1", "rstatix", "lme4", "ggeffects", "tidyverse", "conflicted", "forecast")
+pkg_list <- c("tidyverse", "glue", "broom", "magrittr", "prettydoc", "DT", "reshape2", "plotly", "moments", "emmeans", "gtsummary", "lmtest", "table1", "rstatix", "lme4", "ggeffects", "conflicted", "forecast")
 
 pacman::p_load(char = pkg_list) #update=TRUE
-pacman::p_load_gh("rstudio/gt")
+pacman::p_load_gh(c("rstudio/gt", "tidyverse/dplyr"))
 #knitr::write_bib(c(.packages(), pkg_list), 'bib/packages.bib')
 
 knitr::opts_chunk$set(
   fig.align="center",
   #fig.pos = "!H",
   #out.extra = "",
-  tidy = TRUE,
+  #tidy = TRUE,
   warning = FALSE,
   echo = FALSE,
   message = FALSE,
@@ -55,6 +55,8 @@ options(scipen=999, digits=5)
 tc <- 0
 alpha <- 0.05
 set.seed(42)
+
+initial.data <- "../data/initial.csv"
 ```
 
 ```{r}
@@ -74,19 +76,26 @@ conflict_prefer("layout", "plotly")
 ***
 
 ```{r}
-data.wide <- readr::read_csv("../data/camio.csv") %>% dplyr::select(-X1) %T>% print
+data.wide <- readr::read_csv(initial.data) %>% 
+  dplyr::select(-X1) %>% 
+  mutate(across(c(hotspot, mode), as.factor)) %T>% print
 ```
 
 ```{r results=FALSE}
-## With reshape2
-data.long <- data.wide %>% reshape2::melt(measure.vars=c("P1", "P2", "P3", "P4"), variable.name = "subject", value.name="time") %T>% print
+### With reshape2
+data.long <- data.wide %>% 
+  reshape2::melt(measure.vars=c("P1", "P2", "P3", "P4"), variable.name = "subject", value.name="time") %>% 
+  group_by(subject) %>% mutate(id = seq_along(hotspot), .before = hotspot) %>% ungroup() %T>% print
 
-## (old) With tidyr 0.8.5
+### (old) With tidyr 0.8.5
 #data.long <- data.wide %>% gather(key="subject", value="time", "P1":"P4") %T>% print
 #data.long <- data.wide %>% gather(key="subject", value="time", c("P1", "P2", "P3", "P4")) %T>% print
 
-## With tidyr 1.0.0
-#data.long <- data.wide %>% pivot_longer(cols = "P1":"P4", names_to="subject", values_to = "time") %T>% print
+### With tidyverse >= 1.0.0 && dplyr >= 0.8.99
+# data.long <- data.wide %>% 
+#   mutate(id = seq_along(hotspot), .before = hotspot) %>% 
+#   pivot_longer(cols = "P1":"P4", names_to="subject", names_transform = list(subject = as.factor), values_to = "time") %>%
+#   group_by(subject) %>% arrange(id, .by_group=T) %>% ungroup() %T>% print
 ```
 
 # Summary / descriptive statistics:

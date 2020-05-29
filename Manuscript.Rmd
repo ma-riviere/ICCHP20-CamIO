@@ -3,8 +3,11 @@ title: "An Audio-Based 3D Spatial Guidance AR System for Blind Users"
 titlerunning: Audio-Based 3D Spatial Guidance
 authorrunning: J. Couhlan et al.
 output:
+  word_document:
+    reference_docx: res/templates/template.docx
+    toc: no
   pdf_document:
-    template: res/templates/markdown.tex
+    template: res/templates/template.tex
     toc: no
     keep_tex: yes
 institutes:
