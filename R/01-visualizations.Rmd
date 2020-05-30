@@ -7,7 +7,6 @@ Original data:
 DT::datatable(
   data.wide,
   class = 'cell-border stripe compact',
-  filter = 'top',
   options = list(pageLength = 20, autoWidth = TRUE),
   caption = htmltools::tags$caption(
     style = 'caption-side: bottom; text-align: center;',
@@ -91,18 +90,15 @@ fig <- data.long %>%
 ggplotly(fig)
 ```
 
-### Violin & Box plots per guidance mode:
+### Box-Plots per subject & guidance mode:
 
 ```{r}
 plot_ly(
     data.long,
-    x = ~mode,
+    x = ~subject:mode,
     y = ~time,
-    color = ~mode,
-    type = 'violin',
-    points = 'all',
-    box = list(visible = T),
-    meanline = list(visible = T),
+    color = ~subject:mode,
+    type = 'box',
     showlegend = FALSE,
     colors = "Set1"
   ) %>%
@@ -112,6 +108,23 @@ plot_ly(
     title = glue('Fig {tc<-tc+1}: Violin + Box-Plots per guidance mode')
   )
 ```
+
+### Lineplot of averages between guidance mode :
+
+```{r}
+dat <- data.long %>% Rmisc::summarySE(measurevar="time", groupvars=c("mode", "subject")) %>% print
+#dat2 <- data.long %>% mutate(se = se(time))
+pd <- position_dodge(0.15)
+
+fig <- dat %>%
+  ggplot(aes(x = mode, y = time, color = subject)) + #group=1
+  geom_line(position = pd) +
+  geom_errorbar(aes(ymin = time - se, ymax = time + se), width = .1, position = pd) +
+  geom_point(shape=21, size=2, fill="white", position = pd)
+
+ggplotly(fig)
+```
+
 
 ### Summary of scores per guidance mode :
 
