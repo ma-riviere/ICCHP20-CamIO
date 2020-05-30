@@ -32,9 +32,11 @@ $endfor$
 
 
 \begin{document}
-
-\title{$title$}
+%
+\title{$title$ $if(thanks)$\thanks{$thanks$}$endif$}
+%
 $if(subtitle)$\subtitle{$subtitle$}$endif$
+%
 $if(titlerunning)$\titlerunning{$titlerunning$}$endif$
 %
 \newbool{flag}

@@ -2,14 +2,15 @@
 title: "An Audio-Based 3D Spatial Guidance AR System for Blind Users"
 titlerunning: Audio-Based 3D Spatial Guidance
 authorrunning: J. Couhlan et al.
+thanks: Merci !
 output:
-  word_document:
-    reference_docx: res/templates/template.docx
-    toc: no
   pdf_document:
     template: res/templates/template.tex
     toc: no
     keep_tex: yes
+  word_document:
+    reference_docx: res/templates/template.docx
+    toc: no
 institutes:
 - id: 1
   name: The Smith-Kettlewell Eye Research Institute, San Francisco, CA
