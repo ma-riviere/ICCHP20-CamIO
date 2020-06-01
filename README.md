@@ -39,7 +39,7 @@ Repository containing the Manuscript, Data & Analysis code for the ICCHP20 paper
 
 ### Online edition
 
-You can check out the manuscript on **Overleaf**: https://www.overleaf.com/read/vqdhzgdqtrpk
+You can check out the manuscript on **Overleaf**: https://www.overleaf.com/9369464178mfvxkddjbnxk
 
 ### Installing
 To use the analysis code locally, you'll need:
