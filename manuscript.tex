@@ -1,56 +1,28 @@
-% This is template.tex, a sample chapter demonstrating the
-% LLNCS macro package for Springer Computer Science proceedings;
-% Version 2.20 of 2017/10/04
-
 \documentclass[runningheads]{res/templates/llncs}
-
+%
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 \usepackage[hyphens]{url}
 \usepackage{hyperref}
-\usepackage{etoolbox}
-
-
-
-% Include packages from YAML header
-
-
 
 \begin{document}
 
 \title{An Audio-Based 3D Spatial Guidance AR System for Blind Users\thanks{Thank you for ...}}
-
 \titlerunning{Audio-Based 3D Spatial Guidance}
-%
-\newbool{flag}
-\boolfalse{flag}
-%
-\author{
-\ifbool{flag}{\and}{\booltrue{flag}}James Coughlan\inst{1}\orcidID{0000-0003-2775-4083}
-\ifbool{flag}{\and}{\booltrue{flag}}Brandon Biggs\inst{1}\orcidID{0000-1111-2222-3333}
-\ifbool{flag}{\and}{\booltrue{flag}}Marc-Aurèle Rivière\inst{2}\orcidID{0000-0002-5108-3382}
-\ifbool{flag}{\and}{\booltrue{flag}}Huiying Shen\inst{1}\orcidID{0000-1111-2222-3333}
-}
-%
-\authorrunning{J. Coughlan et al.}
-% First names are abbreviated in the running head.
-% If there are more than two authors, 'et al.' is used.
-%
-\boolfalse{flag}
-%
-\institute{
-\ifbool{flag}{\and}{\booltrue{flag}}
- The Smith-Kettlewell Eye Research Institute, San Francisco, CA \\
- \email{\href{mailto:coughlan@ski.org}{\nolinkurl{coughlan@ski.org}},
-\href{mailto:brandon.biggs@ski.org}{\nolinkurl{brandon.biggs@ski.org}},
-\href{mailto:hshen@ski.org}{\nolinkurl{hshen@ski.org}}} 
-\ifbool{flag}{\and}{\booltrue{flag}}
- LITIS, University of Rouen, Normandy, France \\
- \email{\href{mailto:marc-aurele.riviere@univ-rouen.fr}{\nolinkurl{marc-aurele.riviere@univ-rouen.fr}}} 
-}
 
+\author{James Coughlan\inst{1}\orcidID{0000-0003-2775-4083} \and
+Brandon Biggs\inst{1} \and
+Marc-Aurèle Rivière\inst{2}\orcidID{0000-0002-5108-3382} \and
+Huiying Shen\inst{1}}
+
+\authorrunning{J. Coughlan et al.}
+
+\institute{The Smith-Kettlewell Eye Research Institute, San Francisco, CA \\
+\email{\{coughlan, brandon.biggs, hshen\}@ski.org} \and
+LITIS, University of Rouen, Normandy, France \\
+\email{marc-aurele.riviere@univ-rouen.fr}}
 %
-\maketitle              % typeset the header of the contribution
+\maketitle %
 %
 \begin{abstract}
 Augmented reality (AR) has great potential for blind users because it
@@ -68,21 +40,14 @@ provide verbal guidance towards a target of interest in 3D. The
 experiment we report with blind participants using this guidance
 interface demonstrates the feasibility of the approach and its benefit
 for helping users find locations of interest.
-\\
-\boolfalse{flag}
-\keywords{
-\ifbool{flag}{\and}{\booltrue{flag}}
-Assisitive Devices
-\ifbool{flag}{\and}{\booltrue{flag}}
-Augmented Reality
-\ifbool{flag}{\and}{\booltrue{flag}}
-Auditory Substitution
-\ifbool{flag}{\and}{\booltrue{flag}}
-Visual Impairment
-}
+
+\keywords{Assisitive Devices
+\and Augmented Reality
+\and Auditory Substitution
+\and Visual Impairment}
 \end{abstract}
 %
-%
+
 \hypertarget{sota}{%
 \section{State of the Art and Related Technology}\label{sota}}
 
@@ -252,7 +217,10 @@ allows the user to explore recessed areas or areas that are otherwise
 invisible to the camera.
 
 \begin{figure}
-\includegraphics[width=0.55\linewidth]{res/img/fig1a} \includegraphics[width=0.45\linewidth]{res/img/fig1b} \caption{(left) Blind participant uses CamIO to explore a toy fire truck. The participant holds the CamIO stylus (a barcode pattern printed on a square wooden dowel with a pointy tip) to point to possible hotspots on the truck. The truck is glued to the board, a piece of paper with a separate barcode pattern, which is taped to the table. An iPhone 8 running CamIO is held by a gooseneck cellphone holder to capture a view of the truck, board and stylus. (right) Stylus points to steering wheel in the truck cabin. Though the steering wheel is in a recessed location that is not visible to CamIO, the stylus tip location can still be estimated.}\label{fig:exp}
+\includegraphics[width=0.55\linewidth]{res/img/fig1a}
+\includegraphics[width=0.45\linewidth]{res/img/fig1b} 
+\caption{(left) Blind participant uses CamIO to explore a toy fire truck. The participant holds the CamIO stylus (a barcode pattern printed on a square wooden dowel with a pointy tip) to point to possible hotspots on the truck. The truck is glued to the board, a piece of paper with a separate barcode pattern, which is taped to the table. An iPhone 8 running CamIO is held by a gooseneck cellphone holder to capture a view of the truck, board and stylus. (right) Stylus points to steering wheel in the truck cabin. Though the steering wheel is in a recessed location that is not visible to CamIO, the stylus tip location can still be estimated.}
+\label{fig:exp}
 \end{figure}
 
 Each hotspot location was searched for under two feedback conditions: G
@@ -393,14 +361,9 @@ verbal directions could be augmented with 3D spatialized sound as in
 more intuitive. Finally, we will continue to test and improve the CamIO
 system, with an emphasis on refining the spatial accuracy of the tip
 location estimates using improved computer vision algorithms.
-%
+
 % ---- Bibliography ----
-%
-% BibTeX users should specify bibliography style 'splncs04'.
-% References will then be sorted and formatted in the correct style.
-%
 \bibliographystyle{res/templates/splncs04}
-% \bibliography{bibliography}
 \bibliography{res/refs.bib}
 
 \end{document}

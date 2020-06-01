@@ -3,6 +3,9 @@
 .RData
 .Ruserdata
 /*.html
+/*.log
+/*.gz
 desktop.ini
-/*.pdf
-/*.tex
+res/*.tex
+res/*.pdf
+res/*.log

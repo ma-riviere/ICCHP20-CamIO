@@ -29,8 +29,7 @@ $endif$
 $for(header-includes)$
 $header-includes$
 $endfor$
-
-
+%
 \begin{document}
 %
 \title{$title$ $if(thanks)$\thanks{$thanks$}$endif$}
@@ -44,14 +43,12 @@ $if(titlerunning)$\titlerunning{$titlerunning$}$endif$
 %
 \author{
 $for(authors)$
-\ifbool{flag}{\and}{\booltrue{flag}}$authors.name$\inst{$authors.inst$}\orcidID{$authors.orcid$}
+\ifbool{flag}{\and}{\booltrue{flag}}$authors.name$\inst{$authors.inst$}$if(authors.orcid)$\orcidID{$authors.orcid$}$endif$
 $endfor$}
 %
 $if(authorrunning)$
 \authorrunning{$authorrunning$}
 $endif$
-% First names are abbreviated in the running head.
-% If there are more than two authors, 'et al.' is used.
 %
 \boolfalse{flag}
 %
@@ -61,9 +58,8 @@ $for(institutes)$
 $if(institutes.name)$ $institutes.name$ $endif$\\
 $if(institutes.emails)$ \email{$institutes.emails$} $endif$
 $endfor$}
-
 %
-\maketitle              % typeset the header of the contribution
+\maketitle
 %
 \begin{abstract}
 $abstract$
@@ -80,12 +76,7 @@ $endfor$}
 $body$
 %
 % ---- Bibliography ----
-%
-% BibTeX users should specify bibliography style 'splncs04'.
-% References will then be sorted and formatted in the correct style.
-%
 \bibliographystyle{$templates$splncs04}
-% \bibliography{bibliography}
 \bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
 
 \end{document}

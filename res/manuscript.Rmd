@@ -5,11 +5,11 @@ authorrunning: J. Couhlan et al.
 thanks: Merci !
 output:
   pdf_document:
-    template: res/templates/template.tex
+    template: templates/template.tex
     toc: no
     keep_tex: yes
   word_document:
-    reference_docx: res/templates/template.docx
+    reference_docx: templates/template.docx
     toc: no
 institutes:
 - id: 1
@@ -37,20 +37,17 @@ abstract: Augmented reality (AR) has great potential for blind users because it 
   of the approach and its benefit for helping users find locations of interest.
 authors:
 - name: James Coughlan
-  orcid: 0000-1111-2222-3333
+  orcid: 0000-0003-2775-4083
   inst: 1
 - name: Brandon Biggs
-  orcid: 0000-1111-2222-3333
   inst: 1
 - name: Marc-Aurèle Rivière
   orcid: 0000-0002-5108-3382
   inst: 2
 - name: Huiying Shen
-  orcid: 0000-1111-2222-3333
   inst: 1
-ressources: res/
-templates: res/templates/
-bibliography: res/refs.bib
+templates: templates/
+bibliography: refs.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -114,8 +111,8 @@ We conducted an experiment to assess the feasibility of the spatial guidance fee
 
 ```{r exp, out.width=c("55%","45%"), fig.cap="(left) Blind participant uses CamIO to explore a toy fire truck. The participant holds the CamIO stylus (a barcode pattern printed on a square wooden dowel with a pointy tip) to point to possible hotspots on the truck. The truck is glued to the board, a piece of paper with a separate barcode pattern, which is taped to the table. An iPhone 8 running CamIO is held by a gooseneck cellphone holder to capture a view of the truck, board and stylus. (right) Stylus points to steering wheel in the truck cabin. Though the steering wheel is in a recessed location that is not visible to CamIO, the stylus tip location can still be estimated."}
 
-knitr::include_graphics("res/img/fig1a.jpg")
-knitr::include_graphics("res/img/fig1b.jpg")
+knitr::include_graphics("img/fig1a.jpg")
+knitr::include_graphics("img/fig1b.jpg")
 ```
 
 Each hotspot location was searched for under two feedback conditions: G (guidance provided) and NG (no guidance). The participant was given up to 120 sec. to find each hotspot, after which a time-out was declared. In order to minimize the influence of any possible learning effects, which could make it easier to find a hotspot the second time it was searched for, we randomized the sequence of hotspots and alternated between NG and G trials. This resulted in a sequence of 2K = 20 trials, starting with an NG trial, the same sequence for each participant.
@@ -131,8 +128,8 @@ Next each participant performed the formal experimental trials, which consisted 
 We conducted an experiment to assess the feasibility of the spatial guidance feedback and to determine whether the feedback speeds up the target search. The experiment (\ref{fig:exp}) compared how much time a blind participant needed to find hotspots (points of interest) on a 3D object with spatial guidance vs. without it. The object was a large toy fire truck (27 cm x 12 cm x 14 cm), with K=10 distinct hotspot locations defined in advance. The hotspots were tactilely salient features such as lights, hooks or other features that protruded from the truck. Some hotspots were in recessed locations on the truck, such as the shift stick and steering wheel (\ref{fig:exp}) in the front cabin, or on the side of the truck facing away from the participant; these hotspots were difficult to find and access, whether by fingertip or by stylus. In fact, the difficulty of accessing such locations highlights an advantage of the CamIO stylus, whose tip need not be visible to the camera. This allows the user to explore recessed areas or areas that are otherwise invisible to the camera. 
 
 \begin{figure}
-\includegraphics[width=5.5cm, keepaspectratio,]{res/img/fig2a.jpg}
-\includegraphics[width=6.5cm, keepaspectratio,]{res/img/fig2b.jpg}
+\includegraphics[width=5.5cm, keepaspectratio,]{img/fig2a.jpg}
+\includegraphics[width=6.5cm, keepaspectratio,]{img/fig2b.jpg}
 \caption{(left) Plot of time (x axis) to find target hotspot location for G (‘o’ symbol) vs. NG  (‘x’ symbol) conditions, with time-out declared after 120 sec. of unsuccessful search. Results are shown for each participant (indicated on the y axis and also using color) and at all 10 target locations. (right) Histogram plot showing the distribution of NG time minus G time. The plot aggregates time differences for all participants over all locations; positive times mean the search was faster with G than with NG.}
 \label{fig:res}
 \end{figure}
