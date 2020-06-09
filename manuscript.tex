@@ -7,15 +7,16 @@
 
 \begin{document}
 
-\title{An Audio-Based 3D Spatial Guidance AR System for Blind Users\thanks{Thank you for ...}}
+\title{An Audio-Based 3D Spatial Guidance AR System for Blind Users\thanks{JMC, BB and HS were supported by NIH grant 5R01EY025332 and NIDILRR grant 90RE5024-01-00. We thank Dr. Roberto Manduchi, Dr. Natela Shanidze, Dr. Santani Teng and Dr. Ali Cheraghi for helpful suggestions about the experiments.}}
+
 \titlerunning{Audio-Based 3D Spatial Guidance}
 
-\author{James Coughlan\inst{1}\orcidID{0000-0003-2775-4083} \and
-Brandon Biggs\inst{1} \and
+\author{James M. Coughlan\inst{1}\orcidID{0000-0003-2775-4083} \and
+Brandon Biggs\inst{1}\orcidID{0000-0001-7380-1077} \and
 Marc-Aurèle Rivière\inst{2}\orcidID{0000-0002-5108-3382} \and
-Huiying Shen\inst{1}}
+Huiying Shen\inst{1}\orcidID{0000-0002-2195-7085}}
 
-\authorrunning{J. Coughlan et al.}
+\authorrunning{J. M. Coughlan et al.}
 
 \institute{The Smith-Kettlewell Eye Research Institute, San Francisco, CA \\
 \email{\{coughlan, brandon.biggs, hshen\}@ski.org} \and
@@ -41,10 +42,13 @@ experiment we report with blind participants using this guidance
 interface demonstrates the feasibility of the approach and its benefit
 for helping users find locations of interest.
 
-\keywords{Assisitive Devices
+\keywords{Assistive Devices
+\and Accessibility
 \and Augmented Reality
 \and Auditory Substitution
-\and Visual Impairment}
+\and Visual Impairment
+\and Blindness
+\and Low Vision}
 \end{abstract}
 %
 
@@ -127,13 +131,13 @@ participants.
 CamIO is an augmented reality (AR) iPhone app that uses computer vision
 to provide audio labels for rigid 3D objects. The rigid object of
 interest is mounted on a board, which is a printed barcode pattern
-(\ref{fig:exp}) that allows CamIO to estimate the object's pose (3D
+(Fig. \ref{fig:exp}) that allows CamIO to estimate the object's pose (3D
 translation and 3D orientation) relative to the camera. The iPhone is
 typically mounted on a tripod or a gooseneck cellphone holder
-\ref{fig:exp} to obtain a clear view of the board and object, but in
+Fig. ref{fig:exp} to obtain a clear view of the board and object, but in
 some cases \cite{coughlanTowardsAccessibleAudioLabeling2020} users may
 hold the iPhone by hand. The user points the tip of a passive wooden
-stylus \ref{fig:exp}, covered with another barcode pattern, to different
+stylus Fig. \ref{fig:exp}, covered with another barcode pattern, to different
 locations on an object. CamIO estimates the stylus tip's 3D location
 relative to the camera and uses the pose estimate of the board to
 determine the stylus tip's 3D location relative to the object. Whenever
@@ -142,7 +146,7 @@ information about the hotspot. (In other words, hotspot locations are
 defined relative to the board, which is mounted rigidly to the object.)
 
 A second stylus (not shown, identical in form but distinct from the one
-shown in \ref{fig:exp}) is used to create new hotspots, and allows the
+shown in Fig. \ref{fig:exp}) is used to create new hotspots, and allows the
 user to make an audio recording to associate with each new hotspot. Our
 recent work \cite{coughlanTowardsAccessibleAudioLabeling2020}
 demonstrates the accessibility of this authoring process, which allows
@@ -179,7 +183,7 @@ a time -- the direction that will most improve the alignment to the
 target.
 
 We define the guidance interface as follows. The board (barcode pattern
-beneath the truck, see \ref{fig:exp}) defines an xyz coordinate frame,
+beneath the truck, see Fig. \ref{fig:exp}) defines an xyz coordinate frame,
 with \(+x\) = right, \(-x\) = left, \(+y\) = forward (away from the
 user), \(-y\) = back (towards the user), \(+z\) = up and \(-z\) = down.
 Let the desired target hotspot location be denoted \((x*, y*, z*)\), and
@@ -201,14 +205,13 @@ feedback is issued when the stylus is not visible.
 
 We conducted an experiment to assess the feasibility of the spatial
 guidance feedback and to determine whether the feedback speeds up the
-target search. The experiment \ref{fig:exp} compared how much time a
-blind participant needed to find hotspots (points of interest) on a 3D
+target search. The experiment Fig. \ref{fig:exp} compared how much time a blind participant needed to find hotspots (points of interest) on a 3D
 object with spatial guidance vs.~without it. The object was a large toy
 fire truck (27 cm x 12 cm x 14 cm), with K=10 distinct hotspot locations
 defined in advance. The hotspots were tactilely salient features such as
 lights, hooks or other features that protruded from the truck. Some
 hotspots were in recessed locations on the truck, such as the shift
-stick and steering wheel (\ref{fig:exp}) in the front cabin, or on the
+stick and steering wheel (Fig. \ref{fig:exp}) in the front cabin, or on the
 side of the truck facing away from the participant; these hotspots were
 difficult to find and access, whether by fingertip or by stylus. In
 fact, the difficulty of accessing such locations highlights an advantage
@@ -225,7 +228,7 @@ invisible to the camera.
 
 Each hotspot location was searched for under two feedback conditions: G
 (guidance provided) and NG (no guidance). The participant was given up
-to 120 sec.~to find each hotspot, after which a time-out was declared.
+to 120 sec to find each hotspot, after which a time-out was declared.
 In order to minimize the influence of any possible learning effects,
 which could make it easier to find a hotspot the second time it was
 searched for, we randomized the sequence of hotspots and alternated
@@ -247,15 +250,15 @@ experimenter as needed. (The experimenter chose practice hotspots that
 were different from the pre-defined K=10 hotspots.) In the practice
 phase, the experimenter explained that barriers sometimes block the user
 from moving in the suggested guidance direction. For instance, if in
-\ref{fig:exp} the system directs the participant to move ``forward''
+Fig. \ref{fig:exp} the system directs the participant to move ``forward''
 towards the left side mirror, the stylus will soon hit the cabin
 roof/wall as it moves towards the mirror; the participant must find ways
-around such obstacles to find the target hotspot.
+around such obstacles to find the target hotspot. 
 
 Next each participant performed the formal experimental trials, which
 consisted of the 2K=20 trial sequence described above. This sequence
 included 10 trials of both conditions (G and NG), for a total of 20
-trials per participant. After completing the 20 search trials, we
+trials per participant. We  placed a visual barrier between the participant and the object while the experimenter defined the hotspot in each trial to prevent participants from using any residual vision to see the location of the hotspot. After completing the 20 search trials, we
 administered a System Usability Scale (SUS) \cite{brooke1996sus} to
 estimate the usability of the guidance system. Finally, we conducted a
 semi-structured interview asking what participants liked and disliked
@@ -269,14 +272,14 @@ him.
 
 We conducted an experiment to assess the feasibility of the spatial
 guidance feedback and to determine whether the feedback speeds up the
-target search. The experiment (\ref{fig:exp}) compared how much time a
+target search. The experiment (Fig. \ref{fig:exp}) compared how much time a
 blind participant needed to find hotspots (points of interest) on a 3D
 object with spatial guidance vs.~without it. The object was a large toy
 fire truck (27 cm x 12 cm x 14 cm), with K=10 distinct hotspot locations
 defined in advance. The hotspots were tactilely salient features such as
 lights, hooks or other features that protruded from the truck. Some
 hotspots were in recessed locations on the truck, such as the shift
-stick and steering wheel (\ref{fig:exp}) in the front cabin, or on the
+stick and steering wheel (Fig. \ref{fig:exp}) in the front cabin, or on the
 side of the truck facing away from the participant; these hotspots were
 difficult to find and access, whether by fingertip or by stylus. In
 fact, the difficulty of accessing such locations highlights an advantage
