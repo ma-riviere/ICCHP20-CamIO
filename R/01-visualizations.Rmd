@@ -32,6 +32,9 @@ DT::datatable(
 ***
 
 ```{r warnings=F}
+library(pillar)
+options(pillar.sigfig=3)
+
 desc <- data.long %>%
   group_by(mode) %>%
   summarize(
@@ -42,7 +45,9 @@ desc <- data.long %>%
     skew = skewness(time),
     kurt = kurtosis(time),
     SW.p = shapiro.test(time)$p.value
-  )
+  ) %>% mutate(across(where(is.character), as.numeric))
+
+td <- tabl(desc)
 
 DT::datatable(
   desc,
@@ -51,12 +56,17 @@ DT::datatable(
     style = 'caption-side: bottom; text-align: center;',
     glue('Fig {tc<-tc+1}: Summary statistics'))
 ) %>% 
-  formatRound(5:ncol(desc), 4) %>%
-  formatStyle(
-    'SW.p',
-    color = styleInterval(alpha, c('red', 'gray')),
-    fontWeight = styleInterval(alpha, c('bold', 'normal')),
-  )
+  formatRound(4:ncol(desc)-1, 2) %>%
+  formatRound(ncol(desc), 4)
+  # formatStyle(
+  #   'SW.p',
+  #   color = styleInterval(alpha, c('red', 'gray')),
+  #   fontWeight = styleInterval(alpha, c('bold', 'normal')),
+  # )
+
+# png("../res/img/tab1.png", width=480, height=480, bg = "white")
+# grid.table(desc)
+# dev.off()
 ```
 
 [!] TODO: better summary table
@@ -79,14 +89,15 @@ fig <- data.long %>%
   mutate(med = median(time)) %>% 
   ungroup() %>%
   ggplot(aes(x=time, fill=mode, color=mode)) +
-  geom_histogram(aes(y=..density..), binwidth=15, alpha=0.8, fill="white", boundary = 1) +
+  geom_histogram(binwidth=12, fill="white", boundary = 1) + #aes(y=..density..)
   geom_density(alpha=0.6, adjust=6) + 
   theme(legend.position = "none") +
-  labs(title= glue('Fig {tc<-tc+1}: Score distributions + median values per type of guidance'), x = "Time to find hotspot") +
+  labs(x = "Time to find hotspot", y="Count") +
   facet_wrap(. ~ mode) +
   geom_vline(aes(xintercept=med, group=mode, color=mode), linetype="dashed", size=1) +
-  geom_text(aes(x=med - 10, label=med, y=0.055))
+  geom_text(aes(x=med - 10, label=med, y=-1.5))
 
+ggsave(plot=fig, filename="../res/img/histNG.png", device="png", dpi=320, scale=1)
 ggplotly(fig)
 ```
 
@@ -120,9 +131,11 @@ fig <- dat %>%
   ggplot(aes(x = mode, y = time, color = subject)) + #group=1
   geom_line(position = pd) +
   geom_errorbar(aes(ymin = time - se, ymax = time + se), width = .1, position = pd) +
-  geom_point(shape=21, size=2, fill="white", position = pd)
+  geom_point(shape=21, size=2, fill="white", position = pd) +
+  labs(x="Guidance mode", y="Time to find hotspot")
 
 ggplotly(fig)
+ggsave(plot=fig, filename="../res/img/lines.png", device="png", dpi=320, scale=1)
 ```
 
 

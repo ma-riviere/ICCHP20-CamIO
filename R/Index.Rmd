@@ -28,14 +28,14 @@ always_allow_html: yes
 
 # Setup:
 
-```{r setup, include=FALSE, cache=FALSE}
+```{r include=FALSE}
 
+if (!require(knitr)) install.packages("knitr")
 if (!require(pacman)) install.packages("pacman")
-
-pkg_list <- c("tidyverse", "glue", "broom", "magrittr", "prettydoc", "DT", "reshape2", "plotly", "moments", "emmeans", "gtsummary", "lmtest", "table1", "rstatix", "lme4", "ggeffects", "conflicted", "forecast", "Rmisc")
+pkg_list <- c("tidyverse", "glue", "broom", "magrittr", "prettydoc", "DT", "reshape2", "plotly", "moments", "emmeans", "gtsummary", "lmtest", "table1", "rstatix", "lme4", "ggeffects", "conflicted", "forecast", "Rmisc", "gridExtra", "kableExtra", "magick", "webshot")
 
 pacman::p_load(char = pkg_list) #update=TRUE
-pacman::p_load_gh(c("rstudio/gt", "tidyverse/dplyr"))
+#pacman::p_load_gh(c("rstudio/gt", "tidyverse/dplyr"))
 #knitr::write_bib(c(.packages(), pkg_list), 'bib/packages.bib')
 
 knitr::opts_chunk$set(
@@ -50,25 +50,30 @@ knitr::opts_chunk$set(
   cache = FALSE
 )
 
-options(scipen=999, digits=5)
+options(scipen=999, digits=4)
 
 tc <- 0
 alpha <- 0.05
 set.seed(42)
 
 initial.data <- "../data/initial.csv"
+
+conflict_prefer("mutate", "dplyr")
+conflict_prefer("select", "dplyr")
+conflict_prefer("filter", "dplyr")
+conflict_prefer("summarize", "dplyr")
+conflict_prefer("layout", "plotly")
+
+tabl <- function(data, title="Table caption") {
+  kable(data, col.names=gsub("[.]", " ", names(data)), booktabs=T, align="c", digits=3, format.args=list(big.mark=",", scientific=FALSE), escape=F, caption=title, linesep=c("")) %>% 
+    kable_styling(font_size = 10, latex_options = c("striped", "scale_down", "hold_position"), position = "left") %>%
+    row_spec(0, background = "#d4dbde", bold = T, color = "#2b4894")
+}
+options(knitr.table.format = ifelse(knitr::is_latex_output(), "latex", "pandoc"), knitr.kable.NA = "")
 ```
 
 ```{r}
 sessionInfo()
-
-conflict_prefer("select", "dplyr")
-conflict_prefer("filter", "dplyr")
-conflict_prefer("layout", "plotly")
-
-# includes:
-#   in_header: header.html
-#   after_body: sig.html
 ```
 
 # Data preparation:
