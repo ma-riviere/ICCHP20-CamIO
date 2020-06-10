@@ -26,7 +26,9 @@ set.seed(42)
 
 initial.data <- "../data/initial.csv"
 
+conflict_prefer("arrange", "plyr")
 conflict_prefer("mutate", "dplyr")
+conflict_prefer("rename", "dplyr")
 conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 conflict_prefer("summarize", "dplyr")
@@ -38,68 +40,73 @@ tabl <- function(data, title="Table caption") {
     row_spec(0, background = "#d4dbde", bold = T, color = "#2b4894")
 }
 options(knitr.table.format = ifelse(knitr::is_latex_output(), "latex", "pandoc"), knitr.kable.NA = "")
+
+hs.order <- c("1","2","3","4","5","6","7","8","9","10")
 ```
 
 ```{r results='hide'}
 data.wide <- read_csv(initial.data) %>% 
   select(-X1) %>% 
   mutate(mode = ifelse(mode == "N", "NG", "G")) %>%
-  mutate(across(c(hotspot, mode), as.factor))
+  rename("Condition" = mode, "Hotspot" = hotspot) %>%
+  mutate(across(c(Hotspot, Condition), as.factor)) %T>% print
 
 data.long <- data.wide %>%
-  mutate(id = seq_along(hotspot), .before = hotspot) %>%
-  pivot_longer(cols = "P1":"P4", names_to="subject", names_transform = list(subject = as.factor), values_to = "time") %>%
-  relocate(subject, id, mode, hotspot, time) %>%
-  arrange(subject, id) %T>% print
+  mutate(id = seq_along(Hotspot), .before = Hotspot) %>%
+  pivot_longer(cols = "P1":"P4", names_to="Participant", names_transform = list(Participant = as.factor), values_to = "Time") %>%
+  relocate(Participant, id, Condition, Hotspot, Time) %>%
+  #mutate(Hotspot = factor(Hotspot, levels = hs.order, ordered = TRUE)) %>%
+  dplyr::arrange(Participant, id) %T>% print
 ```
 ***
 # Wilcoxon
 ***
 
 ```{r}
-data.long.wil <- data.long %>% arrange(subject, hotspot, mode) %T>% print
+data.long.wil <- data.long %>% dplyr::arrange(Participant, Hotspot, Condition) %T>% print
 ```
 
 ```{r}
-wsrt1 <- wilcox.test(formula=time ~ mode, data=data.long.wil, paired=TRUE, alternative="two.sided")
+wsrt1 <- wilcox.test(formula=Time ~ Condition, data=data.long.wil, paired=TRUE, alternative="two.sided")
 wsrt1 %>% tidy
 ```
 
 ```{r}
-G <- data.long.wil %>% filter(mode == "G") %>% select(time) %T>% print
-NG <- data.long.wil %>% filter(mode == "NG") %>% select(time) %T>% print
+G <- data.long.wil %>% filter(Condition == "G") %>% select(Time) %T>% print
+NG <- data.long.wil %>% filter(Condition == "NG") %>% select(Time) %T>% print
 
-wsrt2 <- wilcox.test(NG$time, G$time, paired=TRUE, alternative="two.sided")
+wsrt2 <- wilcox.test(NG$Time, G$Time, paired=TRUE, alternative="two.sided")
 wsrt2 %>% tidy
 ```
 
 ```{r}
-wilcox_test(time ~ mode, data=data.long.wil, paired=TRUE, alternative="less")
+wilcox_test(Time ~ Condition, data=data.long.wil, paired=TRUE, alternative="less")
 ```
 
 
 ```{r}
-wrst.z <- wilcoxonZ(NG$time, G$time, paired = TRUE, digits = 3)
+wrst.z <- wilcoxonZ(NG$Time, G$Time, paired = TRUE, digits = 3)
 wrst.z
 ```
 
 ```{r}
 wrst.z / sqrt(nrow(NG))
-data.long.wil %>% rstatix::wilcox_effsize(formula=time ~ mode, paired=TRUE)
+data.long.wil %>% rstatix::wilcox_effsize(formula=Time ~ Condition, paired=TRUE)
 ```
+
 ```{r}
-sign_test(time ~ mode, data=data.long.wil)
+sign_test(Time ~ Condition, data=data.long.wil)
 ```
 
 
 # Success:
 
 ```{r}
-data.long.logit <- data.long %>% mutate(success = ifelse(time >= 120, 0, 1)) %T>% print
+data.long.logit <- data.long %>% mutate(Success = ifelse(Time >= 120, 0, 1)) %T>% print
 ```
 
 ```{r}
-tbl1 <- table(data.long.logit$mode, data.long.logit$success)
+tbl1 <- table(data.long.logit$Condition, data.long.logit$Success)
 tbl1
 ```
 
@@ -116,68 +123,119 @@ chisq_test(tbl1)
 ***
 
 ```{r}
-hist1 <- data.long %>% gghistogram(x = "time", add = "median", rug = TRUE, color = "mode", fill = "mode", 
-                          palette = c("#00AFBB", "#E7B800"), bins = 20, xlab="Time to find hotspot", ylab="Count")
+hist1 <-
+  data.long %>% gghistogram(
+    x = "Time",
+    rug = T,
+    add = "median",
+    color = "Condition",
+    fill = "Condition",
+    alpha=0.75,
+    palette = c("#00AFBB", "#f48806"),
+    bins = 20,
+    xticks.by=20,
+    xlab = "Time to find hotspot",
+    ylab = "Count"
+  )
 
-hist2 <- data.long %>% gghistogram(x = "time", add = "median", rug = TRUE, color = "mode", fill = "mode", 
-                          palette = c("#00AFBB", "#E7B800"), bins = 20, xlab="Time to find hotspot", ylab="Count", facet.by="mode")
+hist2 <-
+  data.long %>% gghistogram(
+    x = "Time",
+    rug = T,
+    add = "median",
+    color = "Condition",
+    fill = "Condition",
+    alpha=0.75,
+    palette = c("#00AFBB", "#f48806"),
+    bins = 20,
+    xticks.by=20,
+    xlab = "Time to find hotspot",
+    ylab = "Count",
+    facet.by = "Condition"
+  )
 
-ggsave("../res/img/hist_diff.png", hist1, device = "png", dpi=320)
-ggsave("../res/img/hist_diff.png", hist2, device = "png", dpi=320)
+hist1
+ggsave("../res/img/hist1.png", hist1, device = "png", dpi=320)
+hist2
+ggsave("../res/img/hist2.png", hist2, device = "png", dpi=320)
 ```
 
 ```{r warnings=F}
-data.pairwise <- data.long %>% group_by(subject, hotspot) %>%
-  summarize(diff = abs(diff(time))) %>%
+data.pairwise <- data.long %>% 
+  dplyr::arrange(Participant, Hotspot, desc(Condition)) %>%
+  group_by(Participant, Hotspot) %>%
+  summarize(Diff = -1*diff(Time)) %>%
   ungroup() %T>% print
 ```
 
 ```{r}
-data.pairwise %>% gghistogram(x = "diff", add = "median", rug = TRUE, bins = 20, 
-                                           color="#FC4E07", fill="#FC4E07", xlab="Paired absolute time-differences", ylab="Count")
+data.pairwise %>% gghistogram(
+  x = "Diff",
+  bins = 20,
+  rug = T,
+  color = "#0c8c1a",
+  fill = "#0c8c1a",
+  xlab = "Paired time-differences",
+  ylab = "Count",
+  xticks.by=20
+)
 
-ggsave("../res/img/hist_diff.png", device = "png", dpi=320)
+ggsave("../res/img/hist_diff.png",
+       device = "png",
+       dpi = 320)
 ```
 
-```{r}
-data.long %>% arrange(subject, hotspot) %>% ggdotchart(
-  x = "hotspot",
-  y = "time",
-  color = "mode",
-  palette = c("#00AFBB", "#E7B800"),
-  sorting = "ascending",
+```{r warnings=T}
+test <- data.long %>% 
+  select(Hotspot, Participant, Condition, Time) %>%
+  group_by(Condition) %>% 
+  mutate(Hotspot = factor(Hotspot, levels=hs.order)) %>% 
+  ungroup %>%
+  arrange(Participant, Hotspot) %T>% print
+
+#data.long$Hotspot <- factor(data.long$Hotspot, levels = hs.order)
+
+fig.full <- ggdotchart(
+  test,
+  x = "Hotspot",
+  y = "Time",
+  color = "Condition",
+  #shape = "Condition",
+  palette = c("#00AFBB", "#f48806"),
   add = "segments",
   add.params = list(color = "lightgray", size = 1.5),
-  group = "mode",
-  dot.size = 7,
-  label = "time",
+  group = "Condition",
+  dot.size = 4,
+  #label = "Time",
   font.label = list(
     color = "white",
     size = 8,
     vjust = 0.5
   ),
-  facet.by = "subject",
-  xlab="Hotspot",
-  ylab="Time to find hotspot",
-  ylim = c(0, 130)
+  facet.by = "Participant",
+  xlab = "Hotspot",
+  ylab = "Time to find hotspot",
+  ylim = c(0, 130),
+  yticks.by = 20
 )
 
-ggsave("../res/img/full.png", device = "png", dpi=320)
+fig.full
+ggsave("../res/img/full.png", fig.full, device = "png", dpi=320)
 ```
 
 ```{r}
-dat <- data.long %>% Rmisc::summarySE(measurevar="time", groupvars=c("mode", "subject")) %>% print
+dat <- data.long %>% Rmisc::summarySE(measurevar="Time", groupvars=c("Condition", "Participant")) %>% print
 pd <- position_dodge(0.3)
 
-conflict_prefer("arrange", "plyr")
-
 fig <- dat %>%
-  ggplot(aes(x = mode, y = time, color = subject)) + #group=1
+  ggplot(aes(x = Condition, y = Time, color = Participant)) + #group=1
   geom_line(position = pd) +
-  geom_errorbar(aes(ymin = time - se, ymax = time + se), size = 0.9, width = 0.15, position = pd) +
-  geom_point(aes(fill=subject), shape=21, size=3.2, position = pd) +
+  geom_errorbar(aes(ymin = Time - se, ymax = Time + se), size = 0.9, width = 0.15, position = pd) +
+  geom_point(aes(fill=Participant), shape=21, size=3.2, position = pd) +
   theme_classic() +
-  labs(x="Guidance mode", y="Time to find hotspot")
+  theme(axis.text.x = element_text(size=12, color="black"),
+        axis.text.y = element_text(size=12, color="black")) +
+  labs(x="Guidance condition", y="Time to find hotspot", ylim=c(0,120))
 
 fig
 ggsave("../res/img/lines.png", device = "png", dpi=320)
