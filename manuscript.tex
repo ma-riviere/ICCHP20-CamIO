@@ -290,52 +290,33 @@ invisible to the camera.
 %%TODO: figure description
 %%TODO: split the 4 figures ?
 \begin{figure}
-\includegraphics[width=5.5cm, height=4.3cm,]{res/img/histNG.png}
+\includegraphics[width=5.5cm, height=4.1cm,]{res/img/histNG.png}
 \includegraphics[width=6.5cm, keepaspectratio,]{res/img/lines.png}
 \includegraphics[width=5.5cm, keepaspectratio,]{res/img/fig2a.jpg}
 \includegraphics[width=6.5cm, keepaspectratio,]{res/img/fig2b.jpg}
-\caption{(left) Plot of time (x axis) to find target hotspot location for G (‘o’ symbol) vs. NG  (‘x’ symbol) conditions, with time-out declared after 120 sec. of unsuccessful search. Results are shown for each participant (indicated on the y axis and also using color) and at all 10 target locations. (right) Histogram plot showing the distribution of NG time minus G time. The plot aggregates time differences for all participants over all locations; positive times mean the search was faster with G than with NG.}
+\caption{
+(Upper-left) Histogram of the times to find the hotspots per guidance condition. 
+(Upper-right) Line plot showing the average time to find the hotspot ($\pm{ SE}$) per subject and per guidance condition. 
+(Bottom-left) Time to find target hotspot location for G (‘o’ symbol) vs. NG  (‘x’ symbol) conditions. The times for each of the 10 hotspots are shown, for each participant (indicated on the y axis and also using color). 
+(Bottom-right) Histogram of the differences (paired by hotspot) in time to find the hotspot.}
 \label{fig:res}
 \end{figure}
 
-We analyzed the differences between times under G vs.~NG using a
-Wilcoxon signed rank test. The resulting p-value is p = 3.8 x 10-8. This
-is a highly statistically significant p-value supporting the rejection
-of the null hypothesis that the distribution of times under G is the
-same as the distribution of times under NG.
+We used a Wilcoxon Signed Rank test to compare the differences between G and NG times, paired by hotspot within each participant. The result indicated that participants performed significantly better in the guided condition (med = 14,5) than in the non guided one (med = 120), with T=815, z=5.45, $p < 0.001$, and an effect size of V = 0.86.
 
-The following System Usability Scale (SUS) scores were calculated:
-P1=65, P2=75, P3=77.5, for an average of 72.5. An SUS score of 68 is
-considered ``average'' while scores in the mid- to high 70s are
-considered ``good'' (\url{https://measuringu.com/interpret-sus-score/}).
-Overall, the SUS scores suggest that the guidance system is usable but
-needs improvement.
+The following System Usability Scale (SUS) scores were calculated: P1=65, P2=75, P3=77.5, for an average of 72.5. 
+An SUS score of 68 is considered ``average'' while scores in the mid- to high 70s are considered ``good'' (\url{https://measuringu.com/interpret-sus-score/}).
+Overall, the SUS scores suggest that the guidance system is usable but needs improvement.
 
-Next we summarize the qualitative feedback we obtained in the
-semi-structured interviews. All participants who provided qualitative
-feedback (P1, P2 and P3) acknowledged the benefit of the audio guidance
-that was provided, which they found intuitive and clearly superior to
-finding hotspots without guidance. However, P1 and P2 felt that the
-limited spatial accuracy of the CamIO system was the biggest problem
-that needed to be addressed; for instance, in some cases the system
-announced the target had been reached even though the stylus tip was
-hovering about 1 cm above the truck surface. (This spatial inaccuracy
+Next we summarize the qualitative feedback we obtained in the semi-structured interviews. 
+All participants who provided qualitative feedback (P1, P2 and P3) acknowledged the benefit of the audio guidance that was provided, which they found intuitive and clearly superior to finding hotspots without guidance. However, P1 and P2 felt that the limited spatial accuracy of the CamIO system was the biggest problem that needed to be addressed; for instance, in some cases the system announced the target had been reached even though the stylus tip was hovering about 1 cm above the truck surface. (This spatial inaccuracy
 results from noise in the board pose and stylus tip location estimates.)
-P3 expressed frustration with time lag, i.e., the voice feedback tended
-to lag behind the current location of the stylus, even when she was
-moving the stylus slowly; she also felt that the speed of the repetitive
-speech feedback made her feel rushed.
+P3 expressed frustration with time lag, i.e., the voice feedback tended to lag behind the current location of the stylus, even when she was moving the stylus slowly; she also felt that the speed of the repetitive speech feedback made her feel rushed.
 
 When asked what improvements the participants wanted, P1 suggested
-equipping the stylus with a button that turns on the guidance feedback,
-and the addition of multiple vibrators on the stylus that could provide
-haptic feedback indicating which way the stylus should be moved. P2
-suggested adding audio information similar to the earlier guidance
-system that the authors experimented with (Sec. 3), which would use a
-combination of tempo, pitch and volume changes to signal when the stylus
-gets closer to the target location. P3 expressed the desire that CamIO
-work with any ordinary pen or pencil, rather than requiring the special
-stylus we used.
+equipping the stylus with a button that turns on the guidance feedback, and the addition of multiple vibrators on the stylus that could provide haptic feedback indicating which way the stylus should be moved. 
+P2 suggested adding audio information similar to the earlier guidance system that the authors experimented with (Sec. 3), which would use a combination of tempo, pitch and volume changes to signal when the stylus gets closer to the target location. 
+P3 expressed the desire that CamIO work with any ordinary pen or pencil, rather than requiring the special stylus we used.
 
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
