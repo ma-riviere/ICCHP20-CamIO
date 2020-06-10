@@ -290,20 +290,25 @@ data.wide.GN <- data.long %>% reshape2::dcast(subject+hotspot~mode,  value.var="
 ```
 
 ```{r}
-wilcoxon.res <- wilcox.test(data.wide.GN$N, data.wide.GN$G, alternative="two.sided", paired=TRUE, conf.int=TRUE)
+wilcoxon.res <- wilcox.test(data.wide.GN$N, data.wide.GN$G, paired=TRUE, conf.int=TRUE, correct = FALSE)
 
-summary.wilcoxon <- wilcoxon.res %>% tidy
+wilcoxonZ(
+  data.wide.GN$N,
+  data.wide.GN$G,
+  mu = 0,
+  paired = TRUE,
+  exact = FALSE,
+  correct = FALSE,
+  digits = 3
+)
 
-DT::datatable(
-  summary.wilcoxon,
-  class = 'cell-border stripe compact',
-  options = list(autoWidth = TRUE),
-  caption = htmltools::tags$caption(
-    style = 'caption-side: bottom; text-align: center;',
-    glue('Fig {tc<-tc+1}: Signed-Rank Wilcoxon Test summary')
-  )
-) %>% formatRound(1:5, 2)
+wilcoxon.res %>% tidy
 ```
+```{r}
+median(data.wide.GN$G)
+median(data.wide.GN$N)
+```
+
 
 #### Effect size:
 
@@ -458,7 +463,7 @@ data.long.time2 <- data.long %>%
 ```
 
 ```{r}
-glmm1 <- lmer(time ~mode + (1|id/mode), data=data.long.time2)
+glmm1 <- lmer(time ~mode + (1|subject), data=data.long.time2)
 glmm1
 ```
 

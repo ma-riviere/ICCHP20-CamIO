@@ -1,0 +1,186 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r include=FALSE}
+
+if (!require(knitr)) install.packages("knitr")
+if (!require(pacman)) install.packages("pacman")
+pkg_list <- c("tidyverse", "glue", "magrittr", "plotly", "moments", "emmeans", "conflicted", "gridExtra", "kableExtra", "rcompanion", "broom", "rstatix", "ggpubr", "Rmisc")
+
+pacman::p_load(char = pkg_list) #update=TRUE
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  echo = FALSE,
+  message = FALSE,
+  error=FALSE,
+  cache = FALSE
+)
+
+options(scipen=999, digits=4)
+
+alpha <- 0.05
+set.seed(42)
+
+initial.data <- "../data/initial.csv"
+
+conflict_prefer("mutate", "dplyr")
+conflict_prefer("select", "dplyr")
+conflict_prefer("filter", "dplyr")
+conflict_prefer("summarize", "dplyr")
+conflict_prefer("layout", "plotly")
+
+tabl <- function(data, title="Table caption") {
+  kable(data, col.names=gsub("[.]", " ", names(data)), booktabs=T, align="c", digits=3, format.args=list(big.mark=",", scientific=FALSE), escape=F, caption=title, linesep=c("")) %>% 
+    kable_styling(font_size = 10, latex_options = c("striped", "scale_down", "hold_position"), position = "left") %>%
+    row_spec(0, background = "#d4dbde", bold = T, color = "#2b4894")
+}
+options(knitr.table.format = ifelse(knitr::is_latex_output(), "latex", "pandoc"), knitr.kable.NA = "")
+```
+
+```{r results='hide'}
+data.wide <- read_csv(initial.data) %>% 
+  select(-X1) %>% 
+  mutate(mode = ifelse(mode == "N", "NG", "G")) %>%
+  mutate(across(c(hotspot, mode), as.factor))
+
+data.long <- data.wide %>%
+  mutate(id = seq_along(hotspot), .before = hotspot) %>%
+  pivot_longer(cols = "P1":"P4", names_to="subject", names_transform = list(subject = as.factor), values_to = "time") %>%
+  relocate(subject, id, mode, hotspot, time) %>%
+  arrange(subject, id) %T>% print
+```
+***
+# Wilcoxon
+***
+
+```{r}
+data.long.wil <- data.long %>% arrange(subject, hotspot, mode) %T>% print
+```
+
+```{r}
+wsrt1 <- wilcox.test(formula=time ~ mode, data=data.long.wil, paired=TRUE, alternative="two.sided")
+wsrt1 %>% tidy
+```
+
+```{r}
+G <- data.long.wil %>% filter(mode == "G") %>% select(time) %T>% print
+NG <- data.long.wil %>% filter(mode == "NG") %>% select(time) %T>% print
+
+wsrt2 <- wilcox.test(NG$time, G$time, paired=TRUE, alternative="two.sided")
+wsrt2 %>% tidy
+```
+
+```{r}
+wilcox_test(time ~ mode, data=data.long.wil, paired=TRUE, alternative="less")
+```
+
+
+```{r}
+wrst.z <- wilcoxonZ(NG$time, G$time, paired = TRUE, digits = 3)
+wrst.z
+```
+
+```{r}
+wrst.z / sqrt(nrow(NG))
+data.long.wil %>% rstatix::wilcox_effsize(formula=time ~ mode, paired=TRUE)
+```
+```{r}
+sign_test(time ~ mode, data=data.long.wil)
+```
+
+
+# Success:
+
+```{r}
+data.long.logit <- data.long %>% mutate(success = ifelse(time >= 120, 0, 1)) %T>% print
+```
+
+```{r}
+tbl1 <- table(data.long.logit$mode, data.long.logit$success)
+tbl1
+```
+
+```{r}
+tbl2 <- prop.table(tbl1) %>% round(2)
+tbl2
+```
+
+```{r}
+chisq_test(tbl1)
+```
+***
+# Graphics
+***
+
+```{r}
+hist1 <- data.long %>% gghistogram(x = "time", add = "median", rug = TRUE, color = "mode", fill = "mode", 
+                          palette = c("#00AFBB", "#E7B800"), bins = 20, xlab="Time to find hotspot", ylab="Count")
+
+hist2 <- data.long %>% gghistogram(x = "time", add = "median", rug = TRUE, color = "mode", fill = "mode", 
+                          palette = c("#00AFBB", "#E7B800"), bins = 20, xlab="Time to find hotspot", ylab="Count", facet.by="mode")
+
+ggsave("../res/img/hist_diff.png", hist1, device = "png", dpi=320)
+ggsave("../res/img/hist_diff.png", hist2, device = "png", dpi=320)
+```
+
+```{r warnings=F}
+data.pairwise <- data.long %>% group_by(subject, hotspot) %>%
+  summarize(diff = abs(diff(time))) %>%
+  ungroup() %T>% print
+```
+
+```{r}
+data.pairwise %>% gghistogram(x = "diff", add = "median", rug = TRUE, bins = 20, 
+                                           color="#FC4E07", fill="#FC4E07", xlab="Paired absolute time-differences", ylab="Count")
+
+ggsave("../res/img/hist_diff.png", device = "png", dpi=320)
+```
+
+```{r}
+data.long %>% arrange(subject, hotspot) %>% ggdotchart(
+  x = "hotspot",
+  y = "time",
+  color = "mode",
+  palette = c("#00AFBB", "#E7B800"),
+  sorting = "ascending",
+  add = "segments",
+  add.params = list(color = "lightgray", size = 1.5),
+  group = "mode",
+  dot.size = 7,
+  label = "time",
+  font.label = list(
+    color = "white",
+    size = 8,
+    vjust = 0.5
+  ),
+  facet.by = "subject",
+  xlab="Hotspot",
+  ylab="Time to find hotspot",
+  ylim = c(0, 130)
+)
+
+ggsave("../res/img/full.png", device = "png", dpi=320)
+```
+
+```{r}
+dat <- data.long %>% Rmisc::summarySE(measurevar="time", groupvars=c("mode", "subject")) %>% print
+pd <- position_dodge(0.3)
+
+conflict_prefer("arrange", "plyr")
+
+fig <- dat %>%
+  ggplot(aes(x = mode, y = time, color = subject)) + #group=1
+  geom_line(position = pd) +
+  geom_errorbar(aes(ymin = time - se, ymax = time + se), size = 0.9, width = 0.15, position = pd) +
+  geom_point(aes(fill=subject), shape=21, size=3.2, position = pd) +
+  theme_classic() +
+  labs(x="Guidance mode", y="Time to find hotspot")
+
+fig
+ggsave("../res/img/lines.png", device = "png", dpi=320)
+#ggplotly(fig)
+```
+

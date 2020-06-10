@@ -32,7 +32,7 @@ always_allow_html: yes
 
 if (!require(knitr)) install.packages("knitr")
 if (!require(pacman)) install.packages("pacman")
-pkg_list <- c("tidyverse", "glue", "broom", "magrittr", "prettydoc", "DT", "reshape2", "plotly", "moments", "emmeans", "gtsummary", "lmtest", "table1", "rstatix", "lme4", "ggeffects", "conflicted", "forecast", "Rmisc", "gridExtra", "kableExtra", "magick", "webshot")
+pkg_list <- c("tidyverse", "glue", "broom", "magrittr", "prettydoc", "DT", "reshape2", "plotly", "moments", "emmeans", "gtsummary", "lmtest", "table1", "rstatix", "lme4", "ggeffects", "conflicted", "forecast", "Rmisc", "gridExtra", "kableExtra", "rcompanion")
 
 pacman::p_load(char = pkg_list) #update=TRUE
 #pacman::p_load_gh(c("rstudio/gt", "tidyverse/dplyr"))

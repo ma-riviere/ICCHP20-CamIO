@@ -89,10 +89,12 @@ fig <- data.long %>%
   mutate(med = median(time)) %>% 
   ungroup() %>%
   ggplot(aes(x=time, fill=mode, color=mode)) +
-  geom_histogram(binwidth=12, fill="white", boundary = 1) + #aes(y=..density..)
+  geom_histogram(binwidth=15, fill="white", boundary = 1) + #aes(y=..density..)
   geom_density(alpha=0.6, adjust=6) + 
   theme(legend.position = "none") +
+  #theme_bw() +
   labs(x = "Time to find hotspot", y="Count") +
+  coord_fixed(ratio=5) +
   facet_wrap(. ~ mode) +
   geom_vline(aes(xintercept=med, group=mode, color=mode), linetype="dashed", size=1) +
   geom_text(aes(x=med - 10, label=med, y=-1.5))
