@@ -55,7 +55,7 @@ data.long <- data.wide %>%
   mutate(id = seq_along(Hotspot), .before = Hotspot) %>%
   pivot_longer(cols = "P1":"P4", names_to="Participant", names_transform = list(Participant = as.factor), values_to = "Time") %>%
   relocate(Participant, id, Condition, Hotspot, Time) %>%
-  #mutate(Hotspot = factor(Hotspot, levels = hs.order, ordered = TRUE)) %>%
+  #mutate(Hotspot = factor(Hotspot, levels = hs.order)) %>%
   dplyr::arrange(Participant, id) %T>% print
 ```
 ***
@@ -123,41 +123,22 @@ chisq_test(tbl1)
 ***
 
 ```{r}
-hist1 <-
-  data.long %>% gghistogram(
-    x = "Time",
-    rug = T,
-    add = "median",
-    color = "Condition",
-    fill = "Condition",
-    alpha=0.75,
-    palette = c("#00AFBB", "#f48806"),
-    bins = 20,
-    xticks.by=20,
-    xlab = "Time to find hotspot",
-    ylab = "Count"
-  )
+data.long %>% gghistogram(
+  x = "Time",
+  rug = T,
+  add = "median",
+  color = "Condition",
+  fill = "Condition",
+  alpha = 0.75,
+  palette = c("#00AFBB", "#f48806"),
+  bins = 20,
+  xticks.by = 20,
+  xlab = "Time to find hotspot",
+  ylab = "Count",
+  facet.by = "Condition"
+)
 
-hist2 <-
-  data.long %>% gghistogram(
-    x = "Time",
-    rug = T,
-    add = "median",
-    color = "Condition",
-    fill = "Condition",
-    alpha=0.75,
-    palette = c("#00AFBB", "#f48806"),
-    bins = 20,
-    xticks.by=20,
-    xlab = "Time to find hotspot",
-    ylab = "Count",
-    facet.by = "Condition"
-  )
-
-hist1
-ggsave("../res/img/hist1.png", hist1, device = "png", dpi=320)
-hist2
-ggsave("../res/img/hist2.png", hist2, device = "png", dpi=320)
+ggsave("../res/img/hist.png", device = "png", dpi = 320)
 ```
 
 ```{r warnings=F}
@@ -186,17 +167,8 @@ ggsave("../res/img/hist_diff.png",
 ```
 
 ```{r warnings=T}
-test <- data.long %>% 
-  select(Hotspot, Participant, Condition, Time) %>%
-  group_by(Condition) %>% 
-  mutate(Hotspot = factor(Hotspot, levels=hs.order)) %>% 
-  ungroup %>%
-  arrange(Participant, Hotspot) %T>% print
-
-#data.long$Hotspot <- factor(data.long$Hotspot, levels = hs.order)
-
 fig.full <- ggdotchart(
-  test,
+  data.long,
   x = "Hotspot",
   y = "Time",
   color = "Condition",
@@ -204,7 +176,7 @@ fig.full <- ggdotchart(
   palette = c("#00AFBB", "#f48806"),
   add = "segments",
   add.params = list(color = "lightgray", size = 1.5),
-  group = "Condition",
+  group = "Hotspot",
   dot.size = 4,
   #label = "Time",
   font.label = list(
@@ -217,7 +189,7 @@ fig.full <- ggdotchart(
   ylab = "Time to find hotspot",
   ylim = c(0, 130),
   yticks.by = 20
-)
+) #+ scale_x_discrete(labels=hs.order)
 
 fig.full
 ggsave("../res/img/full.png", fig.full, device = "png", dpi=320)
