@@ -67,15 +67,16 @@ data.long.wil <- data.long %>% dplyr::arrange(Participant, Hotspot, Condition) %
 ```
 
 ```{r}
-wsrt1 <- wilcox.test(formula=Time ~ Condition, data=data.long.wil, paired=TRUE, alternative="two.sided")
+wsrt1 <- wilcox.test(formula=Time ~ Condition, data=data.long.wil, paired=TRUE, alternative="two.sided", exact=FALSE, correct=FALSE)
 wsrt1 %>% tidy
+wsrt1$statistic
 ```
 
 ```{r}
 G <- data.long.wil %>% filter(Condition == "G") %>% select(Time) %T>% print
 NG <- data.long.wil %>% filter(Condition == "NG") %>% select(Time) %T>% print
 
-wsrt2 <- wilcox.test(NG$Time, G$Time, paired=TRUE, alternative="two.sided")
+wsrt2 <- wilcox.test(NG$Time, G$Time, paired=TRUE, alternative="two.sided", exact=FALSE, correct=FALSE)
 wsrt2 %>% tidy
 ```
 
@@ -90,8 +91,8 @@ wrst.z
 ```
 
 ```{r}
-wrst.z / sqrt(nrow(NG))
-data.long.wil %>% rstatix::wilcox_effsize(formula=Time ~ Condition, paired=TRUE)
+#wrst.z / sqrt(nrow(NG))
+data.long.wil %>% rstatix::wilcox_effsize(formula=Time ~ Condition, paired=TRUE, alternative="less")
 ```
 
 ```{r}

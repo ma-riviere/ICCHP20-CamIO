@@ -9,3 +9,5 @@ desktop.ini
 res/*.tex
 res/*.pdf
 res/*.log
+*.nb.html
+*checkpoint*
