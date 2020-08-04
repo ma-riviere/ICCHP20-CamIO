@@ -30,13 +30,11 @@ always_allow_html: yes
 
 ```{r include=FALSE}
 
-if (!require(knitr)) install.packages("knitr")
-if (!require(pacman)) install.packages("pacman")
+source("utils/dependencies.R", echo=F)
+
 pkg_list <- c("tidyverse", "glue", "broom", "magrittr", "prettydoc", "DT", "reshape2", "plotly", "moments", "emmeans", "gtsummary", "lmtest", "table1", "rstatix", "lme4", "ggeffects", "conflicted", "forecast", "Rmisc", "gridExtra", "kableExtra", "rcompanion")
 
-pacman::p_load(char = pkg_list) #update=TRUE
-#pacman::p_load_gh(c("rstudio/gt", "tidyverse/dplyr"))
-#knitr::write_bib(c(.packages(), pkg_list), 'bib/packages.bib')
+update_packages(pkg_list)
 
 knitr::opts_chunk$set(
   fig.align="center",

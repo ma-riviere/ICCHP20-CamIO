@@ -5,21 +5,39 @@ output: html_notebook
 
 ```{r include=FALSE}
 
-if (!require(knitr)) install.packages("knitr")
-if (!require(pacman)) install.packages("pacman")
-pkg_list <- c("tidyverse", "glue", "magrittr", "plotly", "moments", "emmeans", "conflicted", "gridExtra", "kableExtra", "rcompanion", "broom", "rstatix", "ggpubr", "Rmisc")
+source("utils/dependencies.R", echo=F)
 
-pacman::p_load(char = pkg_list) #update=TRUE
+pkg_list <-
+  c(
+    "knitr",
+    "tidyverse",
+    "glue",
+    "magrittr",
+    "plotly",
+    "moments",
+    "emmeans",
+    "conflicted",
+    "gridExtra",
+    "kableExtra",
+    "rcompanion",
+    "broom",
+    "rstatix",
+    "ggpubr",
+    "Rmisc",
+    "lme4"
+  )
+
+update_packages(pkg_list)
+
+options(install.packages.check.source = "no", scipen=999, digits=4)
 
 knitr::opts_chunk$set(
-  warning = FALSE,
+  warning = TRUE,
   echo = FALSE,
-  message = FALSE,
-  error=FALSE,
+  message = TRUE,
+  error = TRUE,
   cache = FALSE
 )
-
-options(scipen=999, digits=4)
 
 alpha <- 0.05
 set.seed(42)
@@ -35,7 +53,7 @@ conflict_prefer("summarize", "dplyr")
 conflict_prefer("layout", "plotly")
 
 tabl <- function(data, title="Table caption") {
-  kable(data, col.names=gsub("[.]", " ", names(data)), booktabs=T, align="c", digits=3, format.args=list(big.mark=",", scientific=FALSE), escape=F, caption=title, linesep=c("")) %>% 
+  kable(data, col.names=gsub("[.]", " ", names(data)), booktabs=T, align="c", digits=3, format.args=list(big.mark=",", scientific=FALSE), escape=F, caption=title, linesep=c("")) %>%
     kable_styling(font_size = 10, latex_options = c("striped", "scale_down", "hold_position"), position = "left") %>%
     row_spec(0, background = "#d4dbde", bold = T, color = "#2b4894")
 }
@@ -213,5 +231,30 @@ fig <- dat %>%
 fig
 ggsave("../res/img/lines.png", device = "png", dpi=320)
 #ggplotly(fig)
+```
+
+## Analysis tests:
+
+```{r}
+lme0 <- lmer(data = data.long, formula = Time ~ Condition + (1|Participant), REML=FALSE)
+lme0 #%>% broom::tidy()
+```
+
+```{r}
+lme1 <- lmer(data = data.long, formula = Time ~ (1|Participant), REML=FALSE)
+lme1
+```
+
+```{r}
+lme2 <- lmer(data = data.long, formula = Time ~ Condition + (Condition|Participant), REML=FALSE)
+lme2
+```
+
+```{r}
+AIC(lme0, lme1, lme2)
+```
+
+```{r}
+anova(lme0, lme1)
 ```
 
