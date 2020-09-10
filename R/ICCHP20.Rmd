@@ -5,12 +5,12 @@ output: html_notebook
 
 ```{r include=FALSE}
 
-source("utils/dependencies.R", echo=F)
+source("../utils/dependencies.R", echo=F)
 
 pkg_list <-
-  c(
-    "knitr",
+  c("knitr",
     "tidyverse",
+    "dplyr",
     "glue",
     "magrittr",
     "plotly",
@@ -21,10 +21,20 @@ pkg_list <-
     "kableExtra",
     "rcompanion",
     "broom",
-    "rstatix",
+    "broom.mixed",
+    "afex",
     "ggpubr",
     "Rmisc",
-    "lme4"
+    "lme4",
+    "survival",
+    "coxme",
+    "survminer",
+    "easystats/see",
+    "easystats/report",
+    "easystats/performance",
+    "stargazer",
+    "jtools",
+    "gtools"
   )
 
 update_packages(pkg_list)
@@ -42,8 +52,6 @@ knitr::opts_chunk$set(
 alpha <- 0.05
 set.seed(42)
 
-initial.data <- "../data/initial.csv"
-
 conflict_prefer("arrange", "plyr")
 conflict_prefer("mutate", "dplyr")
 conflict_prefer("rename", "dplyr")
@@ -51,6 +59,9 @@ conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 conflict_prefer("summarize", "dplyr")
 conflict_prefer("layout", "plotly")
+conflict_prefer("here", "here")
+
+initial.data <- here("data", "initial.csv")
 
 tabl <- function(data, title="Table caption") {
   kable(data, col.names=gsub("[.]", " ", names(data)), booktabs=T, align="c", digits=3, format.args=list(big.mark=",", scientific=FALSE), escape=F, caption=title, linesep=c("")) %>%
@@ -67,15 +78,17 @@ data.wide <- read_csv(initial.data) %>%
   select(-X1) %>% 
   mutate(mode = ifelse(mode == "N", "NG", "G")) %>%
   rename("Condition" = mode, "Hotspot" = hotspot) %>%
-  mutate(across(c(Hotspot, Condition), as.factor)) %T>% print
+  mutate(across(c(Hotspot, Condition), as.factor)) #%T>% print
 
 data.long <- data.wide %>%
   mutate(id = seq_along(Hotspot), .before = Hotspot) %>%
-  pivot_longer(cols = "P1":"P4", names_to="Participant", names_transform = list(Participant = as.factor), values_to = "Time") %>%
-  relocate(Participant, id, Condition, Hotspot, Time) %>%
+  pivot_longer(cols = "P1":"P4", names_to="Participant", names_transform = list(Participant = as.factor), values_to = "Time") %>% 
+  mutate(Success = as.integer(ifelse(Time >= 120, 0, 1))) %>%
+  relocate(Participant, id, Condition, Hotspot, Success, Time) %>%
   #mutate(Hotspot = factor(Hotspot, levels = hs.order)) %>%
-  dplyr::arrange(Participant, id) %T>% print
+  dplyr::arrange(Participant, id)  %T>% print
 ```
+
 ***
 # Wilcoxon
 ***
@@ -233,28 +246,60 @@ ggsave("../res/img/lines.png", device = "png", dpi=320)
 #ggplotly(fig)
 ```
 
+
+<!--------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------->
+
+
 ## Analysis tests:
+***
+
+### Model building:
 
 ```{r}
-lme0 <- lmer(data = data.long, formula = Time ~ Condition + (1|Participant), REML=FALSE)
-lme0 #%>% broom::tidy()
+cox.mod <- coxph(Surv(Time, Success) ~ Condition + frailty.gaussian(Participant) + frailty.gaussian(Hotspot), data = data.long)
+cox.mod.min <- coxph(Surv(Time, Success) ~ 1 + frailty.gaussian(Participant) + frailty.gaussian(Hotspot), data = data.long)
+summary(cox.mod)
 ```
 
 ```{r}
-lme1 <- lmer(data = data.long, formula = Time ~ (1|Participant), REML=FALSE)
-lme1
+model_performance(cox.mod)
 ```
 
 ```{r}
-lme2 <- lmer(data = data.long, formula = Time ~ Condition + (Condition|Participant), REML=FALSE)
-lme2
+anova(cox.mod, cox.mod.min)
+```
+
+### With cox.me:
+
+```{r}
+cox_me <- coxme(Surv(Time, Success) ~ Condition + (1 | Participant) + (1 | Hotspot), data = data.long)
+cox_me.min <- coxme(Surv(Time, Success) ~ 1 + (1 | Participant) + (1 | Hotspot), data = data.long)
+summary(cox.me)
 ```
 
 ```{r}
-AIC(lme0, lme1, lme2)
+AIC(cox.me)
 ```
 
 ```{r}
-anova(lme0, lme1)
+anova(cox_me, cox_me.min)
+```
+
+
+### Model evaluation:
+
+```{r}
+# ggcoxzph(cox.zph(cox.mod))
+```
+
+```{r}
+ggcoxdiagnostics(cox.mod,
+ type = "schoenfeld",
+ ox.scale = "linear.predictions")
+```
+
+```{r}
+ggforest(cox.mod)
 ```
 
